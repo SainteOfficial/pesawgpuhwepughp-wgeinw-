@@ -1,58 +1,83 @@
--- RemoteEvent Monitor LocalScript mit Fehlerbehandlung
-local erfolg, ergebnis = pcall(function()
-    -- Versuche den RemoteEvent zu finden mit Timeout
-    local startZeit = tick()
-    local maxWartezeit = 10 -- Sekunden
-    local remoteEvent
+-- RemoteEvent-Monitor (vereinfacht)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Versuche, den RemoteEvent zu finden
+print("Suche nach RemoteEvent...")
+
+local success, result = pcall(function()
+    -- Pfad zum RemoteEvent
+    local pfad = ReplicatedStorage:WaitForChild("3aA"):WaitForChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
+    print("RemoteEvent gefunden: " .. pfad:GetFullName())
     
-    print("Suche nach RemoteEvent...")
-    
-    repeat
-        if game:GetService("ReplicatedStorage"):FindFirstChild("3aA") then
-            if game:GetService("ReplicatedStorage"):FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
-                remoteEvent = game:GetService("ReplicatedStorage"):FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
-                break
-            end
+    -- Monitor für Server-zu-Client Kommunikation
+    pfad.OnClientEvent:Connect(function(...)
+        local args = {...}
+        print("=== EINGEHEND (Server → Client) ===")
+        print("Zeit: " .. os.date("%H:%M:%S"))
+        print("Parameter:")
+        
+        for i, arg in ipairs(args) do
+            print("  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg))
         end
-        wait(0.1)
-    until (tick() - startZeit) > maxWartezeit
-    
-    if not remoteEvent then
-        error("RemoteEvent konnte nicht gefunden werden nach " .. maxWartezeit .. " Sekunden")
-    end
-    
-    print("RemoteEvent gefunden: " .. remoteEvent:GetFullName())
-    local funktionsName = remoteEvent:GetFullName()
-    
-    -- Rest des Codes wie zuvor...
-    -- Überwache eingehende Server-zu-Client Kommunikation
-    remoteEvent.OnClientEvent:Connect(function(...)
-        -- [Code wie im ursprünglichen Skript]
+        print("===============================")
     end)
     
-    -- Erstelle eine Kopie der originalen FireServer-Funktion
-    local originalFireServer = remoteEvent.FireServer
-    -- [Rest des Codes wie im ursprünglichen Skript]
+    -- Remote Spy für den RemoteEvent (ohne Überschreiben der Funktion)
+    local eventName = pfad:GetFullName()
+    print("Überwache jetzt: " .. eventName)
+    
+    -- Erstelle ein neues RemoteFunction zum Testen
+    local debugRemote = Instance.new("RemoteFunction")
+    debugRemote.Name = "DebugMonitor"
+    debugRemote.Parent = player
+    
+    -- Verwendung des namecall-Hooks (sicherer als Funktionsüberschreibung)
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
+        
+        -- Prüfe, ob es unser überwachter RemoteEvent ist
+        if self == pfad and (method == "FireServer") then
+            print("=== AUSGEHEND (Client → Server) ===")
+            print("Zeit: " .. os.date("%H:%M:%S"))
+            print("Parameter:")
+            
+            for i, arg in ipairs(args) do
+                print("  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg))
+            end
+            print("===============================")
+        end
+        
+        return oldNamecall(self, ...)
+    end)
+    
+    print("RemoteEvent-Monitor erfolgreich gestartet!")
 end)
 
-if not erfolg then
-    warn("FEHLER beim Ausführen des RemoteEvent-Monitors: " .. tostring(ergebnis))
+if not success then
+    warn("FEHLER: " .. tostring(result))
     
-    -- Prüfe, ob der Pfad überhaupt existiert
-    print("Überprüfe Pfad zu RemoteEvent:")
-    if game:GetService("ReplicatedStorage") then
-        print("- ReplicatedStorage existiert")
-        if game:GetService("ReplicatedStorage"):FindFirstChild("3aA") then
-            print("- '3aA' existiert")
-            if game:GetService("ReplicatedStorage"):FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
-                print("- '8c5664e6-c89f-45fb-9903-0208dfc1fe29' existiert")
-            else
-                print("- '8c5664e6-c89f-45fb-9903-0208dfc1fe29' existiert NICHT")
-            end
+    -- Diagnose des Pfades
+    print("Diagnose des Pfades:")
+    if ReplicatedStorage:FindFirstChild("3aA") then
+        print("- Ordner '3aA' existiert")
+        if ReplicatedStorage:FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
+            print("- RemoteEvent existiert")
         else
-            print("- '3aA' existiert NICHT")
+            print("- RemoteEvent existiert NICHT in '3aA'")
+            print("- Vorhandene Objekte in '3aA':")
+            for _, item in pairs(ReplicatedStorage:FindFirstChild("3aA"):GetChildren()) do
+                print("  - " .. item.Name .. " (" .. item.ClassName .. ")")
+            end
         end
     else
-        print("- ReplicatedStorage existiert NICHT")
+        print("- Ordner '3aA' existiert NICHT in ReplicatedStorage")
+        print("- Vorhandene Objekte in ReplicatedStorage:")
+        for _, item in pairs(ReplicatedStorage:GetChildren()) do
+            print("  - " .. item.Name .. " (" .. item.ClassName .. ")")
+        end
     end
 end
