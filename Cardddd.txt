@@ -1,222 +1,141 @@
--- Umfassender RemoteEvent-Monitor (nur Client-Seite)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-
--- RemoteEvent-Referenz
-local remoteEventPath = {"ReplicatedStorage", "3aA", "8c5664e6-c89f-45fb-9903-0208dfc1fe29"}
-local remoteEvent
-
--- Statistik-Tracking
-local statistik = {
-    ausgehendeAufrufe = 0,
-    eingehendeAufrufe = 0,
-    letzterAufrufZeit = 0,
-    aufrufeProSekunde = 0,
-    aufrufeHistorie = {},
-    parameterHistorie = {}
-}
-
--- GUI für Live-Überwachung erstellen
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RemoteMonitor"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 200)
-Frame.Position = UDim2.new(0, 10, 0, 10)
-Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Frame.BackgroundTransparency = 0.3
-Frame.BorderSizePixel = 0
-Frame.Parent = ScreenGui
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
-Title.Text = "RemoteEvent Monitor"
-Title.Parent = Frame
-
-local StatsText = Instance.new("TextLabel")
-StatsText.Size = UDim2.new(1, -10, 1, -40)
-StatsText.Position = UDim2.new(0, 5, 0, 35)
-StatsText.BackgroundTransparency = 1
-StatsText.TextColor3 = Color3.fromRGB(255, 255, 255)
-StatsText.TextSize = 12
-StatsText.Text = "Wird initialisiert..."
-StatsText.TextXAlignment = Enum.TextXAlignment.Left
-StatsText.TextYAlignment = Enum.TextYAlignment.Top
-StatsText.Parent = Frame
-
--- RemoteEvent finden
-local function findRemoteEvent()
-    local current = game
-    for i, pathPart in ipairs(remoteEventPath) do
-        current = current:WaitForChild(pathPart)
-    end
-    return current
-end
-
--- Ausgabefunktion (sowohl in Konsole als auch GUI)
-local function log(message)
-    print(message)
-    local zeitstempel = os.date("%H:%M:%S")
-    StatsText.Text = zeitstempel .. " - " .. message .. "\n" .. StatsText.Text:sub(1, 500)
-end
-
--- Hauptfunktion
-local function main()
-    log("Suche RemoteEvent...")
+-- Verbesserter RemoteEvent-Monitor (ohne nil-Fehler)
+local success, result = pcall(function()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local remoteEvent = ReplicatedStorage:WaitForChild("3aA"):WaitForChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
     
-    -- RemoteEvent finden
-    local success, result = pcall(findRemoteEvent)
+    -- GUI erstellen
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "RemoteMonitor"
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0, 300, 0, 200)
+    Frame.Position = UDim2.new(0, 10, 0, 10)
+    Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Frame.BackgroundTransparency = 0.3
+    Frame.BorderSizePixel = 0
+    Frame.Parent = ScreenGui
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.Position = UDim2.new(0, 0, 0, 0)
+    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 14
+    Title.Text = "RemoteEvent Monitor"
+    Title.Parent = Frame
+
+    local StatsText = Instance.new("TextLabel")
+    StatsText.Size = UDim2.new(1, -10, 1, -40)
+    StatsText.Position = UDim2.new(0, 5, 0, 35)
+    StatsText.BackgroundTransparency = 1
+    StatsText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    StatsText.TextSize = 12
+    StatsText.Text = "RemoteEvent gefunden: " .. remoteEvent:GetFullName()
+    StatsText.TextXAlignment = Enum.TextXAlignment.Left
+    StatsText.TextYAlignment = Enum.TextYAlignment.Top
+    StatsText.Parent = Frame
     
-    if not success then
-        log("FEHLER: " .. tostring(result))
-        return
-    end
+    -- Statistik
+    local aufrufe = 0
     
-    remoteEvent = result
-    log("RemoteEvent gefunden: " .. remoteEvent:GetFullName())
-    
-    -- Eingehende Ereignisse überwachen (Server zu Client)
+    -- Eingehende Events überwachen
     remoteEvent.OnClientEvent:Connect(function(...)
         local args = {...}
-        statistik.eingehendeAufrufe = statistik.eingehendeAufrufe + 1
+        aufrufe = aufrufe + 1
         
-        log("=== EINGEHEND (Server → Client) ===")
-        log("Zeit: " .. os.date("%H:%M:%S"))
+        -- Aktualisiere GUI und Console
+        local ausgabe = "=== EINGEHEND (Server → Client) ===\n"
+        ausgabe = ausgabe .. "Zeit: " .. os.date("%H:%M:%S") .. "\n"
+        ausgabe = ausgabe .. "Aufruf #: " .. aufrufe .. "\n"
         
         if #args > 0 then
-            log("Parameter:")
+            ausgabe = ausgabe .. "Parameter:\n"
             for i, arg in ipairs(args) do
-                log("  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg))
-                
-                -- Zusätzliche Details für komplexe Typen
-                if typeof(arg) == "Instance" then
-                    log("    - Name: " .. arg.Name)
-                    log("    - Klasse: " .. arg.ClassName)
-                elseif typeof(arg) == "table" then
-                    for k, v in pairs(arg) do
-                        log("    - " .. tostring(k) .. ": " .. tostring(v))
-                    end
-                end
+                ausgabe = ausgabe .. "  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg) .. "\n"
             end
-            
-            -- Parameter für Analyse speichern
-            table.insert(statistik.parameterHistorie, {
-                richtung = "eingehend",
-                zeit = os.time(),
-                params = args
-            })
         else
-            log("Keine Parameter")
+            ausgabe = ausgabe .. "Keine Parameter\n"
         end
+        
+        print(ausgabe)
+        StatsText.Text = ausgabe
     end)
     
-    -- Namecall-Hook für ausgehende Ereignisse
-    local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local args = {...}
-        local method = getnamecallmethod()
-        
-        if self == remoteEvent and method == "FireServer" then
-            statistik.ausgehendeAufrufe = statistik.ausgehendeAufrufe + 1
-            local aktuelleZeit = tick()
+    -- Ausgehende Events überwachen mit hookmetamethod
+    if hookmetamethod then
+        local oldNamecall
+        oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+            local args = {...}
+            local method = getnamecallmethod()
             
-            -- Berechne Aufrufe pro Sekunde
-            if statistik.letzterAufrufZeit > 0 then
-                local zeitDifferenz = aktuelleZeit - statistik.letzterAufrufZeit
-                table.insert(statistik.aufrufeHistorie, zeitDifferenz)
+            if self == remoteEvent and method == "FireServer" then
+                aufrufe = aufrufe + 1
                 
-                -- Behalte nur die letzten 10 Aufrufe für den Durchschnitt
-                if #statistik.aufrufeHistorie > 10 then
-                    table.remove(statistik.aufrufeHistorie, 1)
-                end
+                -- Ausgabe erstellen
+                local ausgabe = "=== AUSGEHEND (Client → Server) ===\n"
+                ausgabe = ausgabe .. "Zeit: " .. os.date("%H:%M:%S") .. "\n"
+                ausgabe = ausgabe .. "Aufruf #: " .. aufrufe .. "\n"
                 
-                local durchschnitt = 0
-                for _, diff in ipairs(statistik.aufrufeHistorie) do
-                    durchschnitt = durchschnitt + diff
-                end
-                
-                if durchschnitt > 0 then
-                    statistik.aufrufeProSekunde = #statistik.aufrufeHistorie / durchschnitt
-                end
-            end
-            
-            statistik.letzterAufrufZeit = aktuelleZeit
-            
-            log("=== AUSGEHEND (Client → Server) ===")
-            log("Zeit: " .. os.date("%H:%M:%S"))
-            log("Aufruf #: " .. statistik.ausgehendeAufrufe)
-            log("Aufrufe/Sek: " .. string.format("%.2f", statistik.aufrufeProSekunde))
-            
-            if #args > 0 then
-                log("Parameter:")
-                for i, arg in ipairs(args) do
-                    log("  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg))
-                    
-                    -- Zusätzliche Details für komplexe Typen
-                    if typeof(arg) == "Instance" then
-                        log("    - Name: " .. arg.Name)
-                        log("    - Klasse: " .. arg.ClassName)
-                    elseif typeof(arg) == "table" then
-                        for k, v in pairs(arg) do
-                            log("    - " .. tostring(k) .. ": " .. tostring(v))
-                        end
+                if #args > 0 then
+                    ausgabe = ausgabe .. "Parameter:\n"
+                    for i, arg in ipairs(args) do
+                        ausgabe = ausgabe .. "  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg) .. "\n"
                     end
+                else
+                    ausgabe = ausgabe .. "Keine Parameter\n"
                 end
                 
-                -- Parameter für Analyse speichern
-                table.insert(statistik.parameterHistorie, {
-                    richtung = "ausgehend",
-                    zeit = os.time(),
-                    params = args
-                })
-            else
-                log("Keine Parameter")
+                print(ausgabe)
+                StatsText.Text = ausgabe
             end
-        end
-        
-        return oldNamecall(self, ...)
-    end)
-    
-    -- Änderungen am RemoteEvent überwachen
-    local function überwacheÄnderungen(obj)
-        for _, prop in ipairs({"Name", "Parent"}) do
-            obj:GetPropertyChangedSignal(prop):Connect(function()
-                log("RemoteEvent Eigenschaft geändert: " .. prop .. " = " .. tostring(obj[prop]))
-            end)
+            
+            return oldNamecall(self, ...)
+        end)
+    else
+        -- Fallback für Plattformen, die hookmetamethod nicht unterstützen
+        local originalFireServer = remoteEvent.FireServer
+        remoteEvent.FireServer = function(self, ...)
+            aufrufe = aufrufe + 1
+            
+            -- Ausgabe erstellen
+            local ausgabe = "=== AUSGEHEND (Client → Server) ===\n"
+            ausgabe = ausgabe .. "Zeit: " .. os.date("%H:%M:%S") .. "\n"
+            ausgabe = ausgabe .. "Aufruf #: " .. aufrufe .. "\n"
+            
+            local args = {...}
+            if #args > 0 then
+                ausgabe = ausgabe .. "Parameter:\n"
+                for i, arg in ipairs(args) do
+                    ausgabe = ausgabe .. "  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg) .. "\n"
+                end
+            else
+                ausgabe = ausgabe .. "Keine Parameter\n"
+            end
+            
+            print(ausgabe)
+            StatsText.Text = ausgabe
+            
+            return originalFireServer(self, ...)
         end
     end
     
-    überwacheÄnderungen(remoteEvent)
-    
-    -- Regelmäßig Statistiken aktualisieren
-    RunService.Heartbeat:Connect(function()
-        StatsText.Text = "RemoteEvent: " .. remoteEvent.Name .. 
-                      "\nPfad: " .. remoteEvent:GetFullName() .. 
-                      "\n\nStatistik:" ..
-                      "\n- Ausgehende Aufrufe: " .. statistik.ausgehendeAufrufe .. 
-                      "\n- Eingehende Aufrufe: " .. statistik.eingehendeAufrufe .. 
-                      "\n- Aufrufe/Sekunde: " .. string.format("%.2f", statistik.aufrufeProSekunde) .. 
-                      "\n\nLetzte Aufrufe:"
-        
-        -- Zeige die letzten 5 Aufrufe
-        local count = 0
-        for i = #statistik.parameterHistorie, 1, -1 do
-            local aufruf = statistik.parameterHistorie[i]
-            StatsText.Text = StatsText.Text .. "\n" .. os.date("%H:%M:%S", aufruf.zeit) .. 
-                          " - " .. aufruf.richtung
-            
-            count = count + 1
-            if count >= 5 then break end
-        end
-    end)
-    
-    log("Monitor erfolgreich gestartet!")
-end
+    print("RemoteEvent-Monitor erfolgreich gestartet!")
+end)
 
--- Starte Hauptfunktion
-main()
+if not success then
+    warn("FEHLER: " .. tostring(result))
+    
+    -- Diagnose
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    if ReplicatedStorage:FindFirstChild("3aA") then
+        print("- '3aA' existiert")
+        if ReplicatedStorage:FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
+            print("- RemoteEvent existiert")
+        else
+            print("- RemoteEvent existiert NICHT")
+        end
+    else
+        print("- '3aA' existiert NICHT")
+    end
+end
