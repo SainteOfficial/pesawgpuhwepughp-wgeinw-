@@ -1,586 +1,79 @@
-------ALL ENEMIES WITH WORLD------ !!!ALL ENEMIES HAS 10MIN COOLDOWN AFTER DEFEATING ALSO BOSSES!!!
-
-
-Ninja Village
-
-
-(ROCK LEE)
-
-local args = {
-    [1] = "unstoppable_fist"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-(KAKASHI)
-
-local args = {
-    [1] = "copy_ninja"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(SASUKE)
-
-local args = {
-    [1] = "awakened_dark_avenger"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(NARUTO SAGE MODE)
-
-local args = {
-    [1] = "awakened_promised_child"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(PAIN) 
-
-local args = {
-    [1] = "six_paths_of_pain"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(NARUTO RAGE MODE) (BOSS)
-
-local args = {
-    [1] = "bijuu_beast"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-Green Village
-
-
-(SON GOHAN)
-
-local args = {
-    [1] = "ultimate_warrior"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(CAPTAIN GINYU)
-
-local args = {
-    [1] = "body_switcher"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-(PICCOLO)
-
-local args = {
-    [1] = "namekian_sage"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(VEGETA)
-
-local args = {
-    [1] = "awakened_prideful_prince"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(GOKU)
-
-local args = {
-    [1] = "awakened_earth_strongest"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(FRIEZA) (BOSS)
-
-local args = {
-    [1] = "awakened_galactic_tyrant"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-
-Shibuya Station
-
-(NOBARA)
-
-local args = {
-    [1] = "cursed_doll"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(MEGUMI) 
-
-local args = {
-    [1] = "awakened_shadow_summoner"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(YUJI)
-
-local args = {
-    [1] = "cursed_fist"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-(YUTA)
-
-local args = {
-    [1] = "rika_blessing"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(GOJO)
-
-local args = {
-    [1] = "limitless_master"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(SUKUNA) (BOSS)
-
-local args = {
-    [1] = "king_of_curses"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-Titans City
-
-
-(ERWIN)
-
-local args = {
-    [1] = "survey_commander"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(MIKASA)
-
-local args = {
-    [1] = "blade_warrior"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(REINER)
-
-local args = {
-    [1] = "armored_giant"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(ZEKE)
-
-local args = {
-    [1] = "beast_giant"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(LEVI)
-
-local args = {
-    [1] = "blade_captain"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(EREN) (BOSS)
-
-local args = {
-    [1] = "combat_giant"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-
-Dimensional Fortress
-
-(KAIGAKU)
-
-local args = {
-    [1] = "thunder_demon"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(HANTENGU)
-
-local args = {
-    [1] = "childish_demon"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(AKAZA)
-
-local args = {
-    [1] = "compass_demon"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(DOMA)
-
-local args = {
-    [1] = "awakened_frost_demon"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(KOKUSHIBO)
-
-local args = {
-    [1] = "awakened_six_eyed_slayer"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(MUZAN) (BOSS)
-
-local args = {
-    [1] = "awakened_pale_demon_lord"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-Candy Island
-
-(DAIFUKU)
-
-local args = {
-    [1] = "genie_commander"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(PEROSPERO)
-
-local args = {
-    [1] = "candy_master"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-(CRACKER)
-
-local args = {
-    [1] = "biscuit_warrior"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(SMOOTHIE)
-
-local args = {
-    [1] = "juice_queen"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(KATAKURI)
-
-local args = {
-    [1] = "mochi_emperor"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(BIG MOM) (BOSS)
-
-local args = {
-    [1] = "soul_queen"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-Solo City
-
-(CHA HAE-IN)
-
-local args = {
-    [1] = "light_saintess"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(THOMAS ANDRE)
-
-local args = {
-    [1] = "the_goliath"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(TANK)
-
-local args = {
-    [1] = "shadow_bear"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-(IGRIS)
-
-local args = {
-    [1] = "shadow_commander"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-(BERU)
-
-local args = {
-    [1] = "shadow_ant"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-(SUNG JINWOO) (BOSS)
-
-local args = {
-    [1] = "awakened_shadow_monarch"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-
-
----------TOWER---------
-
-Battle Tower
-
-mit dem folgenden script kann man die akutelle stufe für den Tower herausfinden :
-
--- LocalScript
-local function checkBattleTowerLevel()
-    -- Pfad zum LocalUser-Modul
-    local LocalUserModule = game:GetService("ReplicatedStorage"):WaitForChild("TS"):WaitForChild("user"):WaitForChild("local"):WaitForChild("local-user")
+-- RemoteEvent Monitor LocalScript
+local remoteEvent = game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
+local funktionsName = remoteEvent:GetFullName()
+
+-- Überwache eingehende Server-zu-Client Kommunikation
+remoteEvent.OnClientEvent:Connect(function(...)
+    local args = {...}
+    print("=== EINGEHENDER REMOTE EVENT ===")
+    print("Event: " .. funktionsName)
+    print("Richtung: Server -> Client")
+    print("Zeit: " .. os.date("%H:%M:%S"))
+    print("Parameter:")
     
-    -- Modul laden und LocalUser abrufen
-    local success, result = pcall(function()
-        local LocalUser = require(LocalUserModule).LocalUser
-        local battleTowerWave = LocalUser.metadata:getAsNumber("battle_tower_wave")
-        return battleTowerWave or 1 -- Wenn nil, dann 1 als Standardwert
-    end)
-    
-    -- Ergebnis in der Konsole ausgeben
-    if success then
-        print("------------------------------")
-        print("Aktuelle Battle Tower Stufe: " .. result)
-        print("------------------------------")
-    else
-        warn("Fehler beim Abrufen der Battle Tower Stufe:", result)
-    end
-end
-
--- Funktion ausführen
-checkBattleTowerLevel()
-
-
-nachdem du stufe hast machst du die nummer dann in den script rein : 
-
-local args = {
-    [1] = 85
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("c1438c4a-417f-41ee-9363-1ebabcc0bbd9"):FireServer(unpack(args))
-
-
-
-
-
-PS: es gibt stufe 1 bis 100
-
-
-
-Infinite Tower
-
-So Startet man den -> game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("888b9aa0-9ca6-4c77-9946-cebf1edf613d"):FireServer()
-
-und so beended man den -> game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("179a96b5-b8d2-4156-a939-6f34c92aa7a6"):FireServer()
-
-und so pausiert man den -> game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("a8a25480-c0f3-426b-834f-0f95cf058edc"):FireServer()
-
-
-und so weiss mein welcher Floor man grad ist : 
-
--- LocalScript zum Ausgeben des aktuellen Floors
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
--- Funktion zum sicheren Abrufen des aktuellen Floors
-local function getCurrentFloor()
-    local success, result = pcall(function()
-        -- LocalUser-Modul laden
-        local LocalUser = require(ReplicatedStorage:WaitForChild("TS"):WaitForChild("user"):WaitForChild("local"):WaitForChild("local-user")).LocalUser
+    for i, arg in ipairs(args) do
+        local argTyp = typeof(arg)
+        local argWert = tostring(arg)
+        print("  " .. i .. ": [" .. argTyp .. "] " .. argWert)
         
-        -- Prüfen, ob infiniteTower existiert
-        if LocalUser and LocalUser.infiniteTower then
-            local document = LocalUser.infiniteTower:getDocument()
-            if document and document.floor then
-                return document.floor
+        -- Wenn es ein Objekt ist, zeige mehr Details
+        if argTyp == "Instance" then
+            print("     Name: " .. arg.Name)
+            print("     Klasse: " .. arg.ClassName)
+            print("     Pfad: " .. arg:GetFullName())
+        elseif argTyp == "table" then
+            for k, v in pairs(arg) do
+                print("     " .. tostring(k) .. ": " .. tostring(v))
             end
         end
-        return nil
-    end)
+    end
+    print("============================")
+end)
+
+-- Erstelle eine Kopie der originalen FireServer-Funktion
+local originalFireServer = remoteEvent.FireServer
+local letzterAufruf = 0
+local aufrufZähler = 0
+
+-- Überschreibe die FireServer-Funktion, um sie zu überwachen
+remoteEvent.FireServer = function(self, ...)
+    -- Führe die eigentliche Funktion aus
+    originalFireServer(self, ...)
     
-    if success and result then
-        return result
-    else
-        if not success then
-            warn("Fehler beim Abrufen des Floors: " .. tostring(result))
+    -- Protokolliere den Aufruf
+    local aktuelleZeit = tick()
+    local zeitDifferenz = aktuelleZeit - letzterAufruf
+    letzterAufruf = aktuelleZeit
+    aufrufZähler = aufrufZähler + 1
+    
+    local args = {...}
+    print("=== AUSGEHENDER REMOTE EVENT ===")
+    print("Event: " .. funktionsName)
+    print("Richtung: Client -> Server")
+    print("Zeit: " .. os.date("%H:%M:%S"))
+    print("Aufruf #: " .. aufrufZähler)
+    print("Zeit seit letztem Aufruf: " .. string.format("%.4f", zeitDifferenz) .. " Sekunden")
+    print("Parameter:")
+    
+    for i, arg in ipairs(args) do
+        local argTyp = typeof(arg)
+        local argWert = tostring(arg)
+        print("  " .. i .. ": [" .. argTyp .. "] " .. argWert)
+        
+        -- Wenn es ein Objekt ist, zeige mehr Details
+        if argTyp == "Instance" then
+            print("     Name: " .. arg.Name)
+            print("     Klasse: " .. arg.ClassName)
+            print("     Pfad: " .. arg:GetFullName())
+        elseif argTyp == "table" then
+            for k, v in pairs(arg) do
+                print("     " .. tostring(k) .. ": " .. tostring(v))
+            end
         end
-        return nil
     end
+    print("============================")
 end
 
--- Hauptschleife zum Ausgeben des Floors alle 5 Sekunden
-while true do
-    local floor = getCurrentFloor()
-    if floor then
-        print("Aktueller Floor: " .. floor)
-    else
-        print("Derzeit nicht im Infinite Tower-Modus oder Floor-Info nicht verfügbar")
-    end
-    
-    task.wait(5) -- 5 Sekunden warten
-end
-
-
-
-
-
-
---------AUTO PICK UP ITEM-----------
-
-
-workspace.Folder <-- dadrinne sind alle Items die man aufheben kann als modelle hier ein BEISPIEL : workspace.Folder:GetChildren()[10]
-
-Der spieler soll mit einem tween zwischen den items getweent werden.
-
----------AUTO MERGE--------
-
-
-guck ich später an 
-
- local args = {
-    [1] = 0,
-    [2] = "light_admiral",
-    [3] = 200,
-    [4] = false
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("noV"):WaitForChild("b57b2bf9-5561-408a-8668-8d7afa1b05f0"):FireServer(unpack(args))
-
-
-
-
-----RAID-----
-
-
-enternal Dragon 
-
- local args = {
-    [1] = "eternal_dragon"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("9f262bf4-f76a-4916-94dc-46596cc25770"):FireServer(unpack(args))
-
-
-
-
-
------SHOP-----
-
-local args = {
-    [1] = "raid_luck_potion",
-    [2] = 1
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("54f5f951-af4e-447d-9ee4-c63d9130fe77"):FireServer(unpack(args))
-
-
-local args = {
-    [1] = "raid_border_chance_potion",
-    [2] = 1
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("54f5f951-af4e-447d-9ee4-c63d9130fe77"):FireServer(unpack(args))
-
-
-local args = {
-    [1] = "raid_cooldown_potion",
-    [2] = 1
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("54f5f951-af4e-447d-9ee4-c63d9130fe77"):FireServer(unpack(args))
-
-
-local args = {
-    [1] = "raid_boss_chance_potion",
-    [2] = 1
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("54f5f951-af4e-447d-9ee4-c63d9130fe77"):FireServer(unpack(args))
-
-
-local args = {
-    [1] = "raid_moon_cycle_reroll_potion",
-    [2] = 1
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("54f5f951-af4e-447d-9ee4-c63d9130fe77"):FireServer(unpack(args))
-
-
-
-
-
-
+-- Zeige Startbenachrichtigung
+print("RemoteEvent-Monitor gestartet für: " .. funktionsName)
+print("Warte auf Aktivitäten...")
