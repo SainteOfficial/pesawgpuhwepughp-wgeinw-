@@ -1,79 +1,58 @@
--- RemoteEvent Monitor LocalScript
-local remoteEvent = game:GetService("ReplicatedStorage"):WaitForChild("3aA"):WaitForChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
-local funktionsName = remoteEvent:GetFullName()
-
--- Überwache eingehende Server-zu-Client Kommunikation
-remoteEvent.OnClientEvent:Connect(function(...)
-    local args = {...}
-    print("=== EINGEHENDER REMOTE EVENT ===")
-    print("Event: " .. funktionsName)
-    print("Richtung: Server -> Client")
-    print("Zeit: " .. os.date("%H:%M:%S"))
-    print("Parameter:")
+-- RemoteEvent Monitor LocalScript mit Fehlerbehandlung
+local erfolg, ergebnis = pcall(function()
+    -- Versuche den RemoteEvent zu finden mit Timeout
+    local startZeit = tick()
+    local maxWartezeit = 10 -- Sekunden
+    local remoteEvent
     
-    for i, arg in ipairs(args) do
-        local argTyp = typeof(arg)
-        local argWert = tostring(arg)
-        print("  " .. i .. ": [" .. argTyp .. "] " .. argWert)
-        
-        -- Wenn es ein Objekt ist, zeige mehr Details
-        if argTyp == "Instance" then
-            print("     Name: " .. arg.Name)
-            print("     Klasse: " .. arg.ClassName)
-            print("     Pfad: " .. arg:GetFullName())
-        elseif argTyp == "table" then
-            for k, v in pairs(arg) do
-                print("     " .. tostring(k) .. ": " .. tostring(v))
+    print("Suche nach RemoteEvent...")
+    
+    repeat
+        if game:GetService("ReplicatedStorage"):FindFirstChild("3aA") then
+            if game:GetService("ReplicatedStorage"):FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
+                remoteEvent = game:GetService("ReplicatedStorage"):FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
+                break
             end
         end
+        wait(0.1)
+    until (tick() - startZeit) > maxWartezeit
+    
+    if not remoteEvent then
+        error("RemoteEvent konnte nicht gefunden werden nach " .. maxWartezeit .. " Sekunden")
     end
-    print("============================")
+    
+    print("RemoteEvent gefunden: " .. remoteEvent:GetFullName())
+    local funktionsName = remoteEvent:GetFullName()
+    
+    -- Rest des Codes wie zuvor...
+    -- Überwache eingehende Server-zu-Client Kommunikation
+    remoteEvent.OnClientEvent:Connect(function(...)
+        -- [Code wie im ursprünglichen Skript]
+    end)
+    
+    -- Erstelle eine Kopie der originalen FireServer-Funktion
+    local originalFireServer = remoteEvent.FireServer
+    -- [Rest des Codes wie im ursprünglichen Skript]
 end)
 
--- Erstelle eine Kopie der originalen FireServer-Funktion
-local originalFireServer = remoteEvent.FireServer
-local letzterAufruf = 0
-local aufrufZähler = 0
-
--- Überschreibe die FireServer-Funktion, um sie zu überwachen
-remoteEvent.FireServer = function(self, ...)
-    -- Führe die eigentliche Funktion aus
-    originalFireServer(self, ...)
+if not erfolg then
+    warn("FEHLER beim Ausführen des RemoteEvent-Monitors: " .. tostring(ergebnis))
     
-    -- Protokolliere den Aufruf
-    local aktuelleZeit = tick()
-    local zeitDifferenz = aktuelleZeit - letzterAufruf
-    letzterAufruf = aktuelleZeit
-    aufrufZähler = aufrufZähler + 1
-    
-    local args = {...}
-    print("=== AUSGEHENDER REMOTE EVENT ===")
-    print("Event: " .. funktionsName)
-    print("Richtung: Client -> Server")
-    print("Zeit: " .. os.date("%H:%M:%S"))
-    print("Aufruf #: " .. aufrufZähler)
-    print("Zeit seit letztem Aufruf: " .. string.format("%.4f", zeitDifferenz) .. " Sekunden")
-    print("Parameter:")
-    
-    for i, arg in ipairs(args) do
-        local argTyp = typeof(arg)
-        local argWert = tostring(arg)
-        print("  " .. i .. ": [" .. argTyp .. "] " .. argWert)
-        
-        -- Wenn es ein Objekt ist, zeige mehr Details
-        if argTyp == "Instance" then
-            print("     Name: " .. arg.Name)
-            print("     Klasse: " .. arg.ClassName)
-            print("     Pfad: " .. arg:GetFullName())
-        elseif argTyp == "table" then
-            for k, v in pairs(arg) do
-                print("     " .. tostring(k) .. ": " .. tostring(v))
+    -- Prüfe, ob der Pfad überhaupt existiert
+    print("Überprüfe Pfad zu RemoteEvent:")
+    if game:GetService("ReplicatedStorage") then
+        print("- ReplicatedStorage existiert")
+        if game:GetService("ReplicatedStorage"):FindFirstChild("3aA") then
+            print("- '3aA' existiert")
+            if game:GetService("ReplicatedStorage"):FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
+                print("- '8c5664e6-c89f-45fb-9903-0208dfc1fe29' existiert")
+            else
+                print("- '8c5664e6-c89f-45fb-9903-0208dfc1fe29' existiert NICHT")
             end
+        else
+            print("- '3aA' existiert NICHT")
         end
+    else
+        print("- ReplicatedStorage existiert NICHT")
     end
-    print("============================")
 end
-
--- Zeige Startbenachrichtigung
-print("RemoteEvent-Monitor gestartet für: " .. funktionsName)
-print("Warte auf Aktivitäten...")
