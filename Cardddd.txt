@@ -1,23 +1,122 @@
-local player = game.Players.LocalPlayer
-local marketplaceService = game:GetService("MarketplaceService")
+-- Skript zum Anzeigen der Items im benutzerdefinierten Backpack
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RuntimeLib = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 
-local function printPlayerItems()
-    -- Backpack-Items
-    print("=== BACKPACK ITEMS ===")
-    for _, item in pairs(player.Backpack:GetChildren()) do
-        print("- " .. item.Name .. " (Typ: " .. item.ClassName .. ")")
+-- Notwendige Module importieren
+local LocalUser = RuntimeLib.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
+local ItemsWithId = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", "items").ItemsWithId
+local ItemCategory = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", "item-category").ItemCategory
+local Rarity = RuntimeLib.import(script, ReplicatedStorage, "TS", "rarity").Rarity
+
+-- Funktion zum Anzeigen der Backpack-Items
+local function printBackpackItems()
+    print("\n=== ITEMS IM BACKPACK ===")
+    
+    -- Backpack-Items aus der Atom-Map abrufen
+    local backpackItems = LocalUser.atomMap.player().backpack.items
+    
+    -- Prüfen, ob Items vorhanden sind
+    local itemCount = 0
+    for _ in pairs(backpackItems) do
+        itemCount = itemCount + 1
     end
     
-    -- Ausgerüstete Items (im Character)
-    print("\n=== AUSGERÜSTETE ITEMS ===")
-    if player.Character then
-        for _, item in pairs(player.Character:GetChildren()) do
-            if item:IsA("Tool") or item:IsA("Accessory") then
-                print("- " .. item.Name .. " (Typ: " .. item.ClassName .. ")")
-            end
+    if itemCount == 0 then
+        print("Keine Items im Backpack gefunden.")
+        return
+    end
+    
+    print("Gefunden:", itemCount, "Items:")
+    
+    -- Details zu jedem Item ausgeben
+    for itemId, itemData in pairs(backpackItems) do
+        local itemInfo = ItemsWithId[itemId]
+        if itemInfo then
+            -- Details zum Item formatieren
+            local itemName = itemInfo.name or "Unbekannt"
+            local rarityName = (itemInfo.rarity and itemInfo.rarity.name) or "Unbekannt"
+            local categoryName = (itemInfo.category and itemInfo.category.name) or "Unbekannt"
+            local quantity = itemData.quantity or 0
+            local equipped = (itemData.equipped and "Ausgerüstet") or "Nicht ausgerüstet"
+            
+            print(string.format(
+                "• %s (ID: %s, Seltenheit: %s, Kategorie: %s, Anzahl: %d, %s)",
+                itemName,
+                itemId,
+                rarityName,
+                categoryName,
+                quantity,
+                equipped
+            ))
+        else
+            print("• Unbekanntes Item (ID: " .. itemId .. ", Anzahl: " .. (itemData.quantity or 0) .. ")")
         end
     end
+    
+    print("=== ENDE DER BACKPACK-ITEMS ===\n")
 end
 
--- Funktion aufrufen
-printPlayerItems()
+-- Funktion zum Anzeigen aller ausgerüsteten Items
+local function printEquippedItems()
+    print("\n=== AUSGERÜSTETE ITEMS ===")
+    
+    local equippedTitle = LocalUser.backpack:getEquippedTitle()
+    local equippedEquipment = LocalUser.backpack:getEquippedEquipment()
+    local equippedArtifact = LocalUser.backpack:getEquippedArtifact()
+    
+    if equippedTitle then
+        print("Titel: " .. equippedTitle.item.name)
+    else
+        print("Kein Titel ausgerüstet")
+    end
+    
+    if equippedEquipment then
+        print("Ausrüstung: " .. equippedEquipment.item.name)
+    else
+        print("Keine Ausrüstung angelegt")
+    end
+    
+    if equippedArtifact then
+        print("Artefakt: " .. equippedArtifact.item.name)
+    else
+        print("Kein Artefakt ausgerüstet")
+    end
+    
+    print("=== ENDE DER AUSGERÜSTETEN ITEMS ===\n")
+end
+
+-- Funktion zum Anzeigen von Items nach Kategorie
+local function printItemsByCategory(category)
+    print("\n=== ITEMS DER KATEGORIE: " .. category.name .. " ===")
+    
+    local backpackItems = LocalUser.atomMap.player().backpack.items
+    local found = false
+    
+    for itemId, itemData in pairs(backpackItems) do
+        local itemInfo = ItemsWithId[itemId]
+        if itemInfo and itemInfo.category == category then
+            found = true
+            print(string.format(
+                "• %s (Anzahl: %d)",
+                itemInfo.name,
+                itemData.quantity or 0
+            ))
+        end
+    end
+    
+    if not found then
+        print("Keine Items in dieser Kategorie gefunden.")
+    end
+    
+    print("=== ENDE DER KATEGORIE ===\n")
+end
+
+-- Funktionen ausführen
+printBackpackItems()
+printEquippedItems()
+
+-- Optional: Items nach Kategorie anzeigen (z.B. Tränke)
+local potionCategory = ItemCategory.POTION
+if potionCategory then
+    printItemsByCategory(potionCategory)
+end
