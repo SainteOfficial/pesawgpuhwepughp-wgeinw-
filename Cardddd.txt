@@ -1,100 +1,52 @@
--- Lokales Skript zum Anzeigen aller Benutzerkarten
+-- Local Script zum Ausgeben aller Karten, Mengen und Raritäten
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+local module = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+local LocalUser = module.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
 
--- Wichtige Module importieren
-local RuntimeLib = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-local LocalUserModule = RuntimeLib.import(script, ReplicatedStorage, "TS", "user", "local", "local-user")
-local RarityModule = RuntimeLib.import(script, ReplicatedStorage, "TS", "rarity")
-local Abbreviators = RuntimeLib.import(script, ReplicatedStorage, "TS", "constants", "abbreviators").Abbreviators
-
-local LocalUser = LocalUserModule.LocalUser
-local Rarity = RarityModule.Rarity
-
--- Funktion zum Formatieren der Rarität als Bruch (z.B. 1/100M)
-local function formatRarity(card)
-    local rarityName = card.rarity.name
-    local rarityValue = card.rarityValue
-    local abbrev = ""
+local function alleKartenAusgeben()
+    print("=== Kartensammlung des Benutzers mit Raritäten ===")
     
-    -- Wert der Rarität abkürzen (K für Tausend, M für Million usw.)
-    if rarityValue >= 1000000000 then
-        abbrev = "B"
-        rarityValue = rarityValue / 1000000000
-    elseif rarityValue >= 1000000 then
-        abbrev = "M"
-        rarityValue = rarityValue / 1000000
-    elseif rarityValue >= 1000 then
-        abbrev = "K"
-        rarityValue = rarityValue / 1000
-    end
+    -- Zugriff auf die Karten des Spielers
+    local spielerKarten = LocalUser.atomMap.player().cards.content
     
-    return string.format("1/%s%s", tostring(rarityValue), abbrev)
-end
-
--- Funktion zum Anzeigen aller Karten
-local function printAllUserCards()
-    print("=== KARTENINVENTAR DES SPIELERS ===")
-    print("Name | Menge | Rarität | Rarität-Wert")
-    print("------------------------------------")
-    
-    -- Abwarten, bis Spielerdaten geladen sind
-    local playerData = LocalUser.atomMap.player()
-    if not playerData then
-        print("Spielerdaten noch nicht geladen. Bitte versuche es später erneut.")
-        return
-    end
-    
-    local cardContent = playerData.cards.content
-    local totalCards = 0
-    local cardCount = 0
-    
-    -- Zählen wie viele Karten insgesamt vorhanden sind
-    for _, amount in pairs(cardContent) do
-        totalCards = totalCards + amount
-    end
-    
-    print("Gesamtzahl der Karten: " .. totalCards)
-    
-    -- Alle Karten durchgehen und ausgeben
-    for cardId, amount in pairs(cardContent) do
-        if amount > 0 then
-            cardCount = cardCount + 1
-            
-            -- Versuche, die Kartendaten aus dem Spielerkartenregister zu laden
-            local userCard = playerData.cards:getCard(cardId)
-            if userCard then
-                local card = userCard:getCard()
-                local rarityText
-                
-                -- Spezielle Ausgabe für besondere Raritäten
-                if card.rarity == Rarity.RAINBOW then
-                    rarityText = "RAINBOW"
-                elseif card.rarity == Rarity.SECRET then
-                    rarityText = "SECRET"
-                else
-                    rarityText = formatRarity(card)
-                end
-                
-                print(string.format("%s | %d | %s | %s", 
-                    card.name,
-                    amount, 
-                    card.rarity.name, 
-                    rarityText
-                ))
-            else
-                print(string.format("Karte ID: %s | Menge: %d | [Kartendaten nicht verfügbar]", 
-                    cardId, 
-                    amount
-                ))
+    -- Durch alle Karten iterieren und sie ausgeben
+    for kartenId, kartenDaten in pairs(spielerKarten) do
+        local menge = kartenDaten
+        
+        -- Falls es ein Objekt mit einer getAmount-Methode ist, diese verwenden
+        if type(kartenDaten) == "table" or type(kartenDaten) == "userdata" then
+            if kartenDaten.getAmount then
+                menge = kartenDaten:getAmount()
             end
         end
+        
+        -- Karte abrufen, um Rarität zu erhalten
+        local kartenObjekt = kartenDaten:getCard()
+        local raritätInfo = ""
+        
+        -- Versuche alle möglichen Rarität-Eigenschaften zu finden
+        if kartenObjekt and kartenObjekt.rarity then
+            if kartenObjekt.rarity.name then
+                raritätInfo = raritätInfo .. "Typ: " .. kartenObjekt.rarity.name
+            end
+            
+            -- Numerische Rarität (1/100m etc.)
+            if kartenObjekt.rarity.odds or kartenObjekt.rarity.chance or kartenObjekt.rarity.rarity then
+                local numerischeRarität = kartenObjekt.rarity.odds or kartenObjekt.rarity.chance or kartenObjekt.rarity.rarity
+                raritätInfo = raritätInfo .. ", Rarität: 1/" .. tostring(numerischeRarität)
+            end
+            
+            -- Fallback, wenn keine spezifische Rarität gefunden wurde
+            if raritätInfo == "" and type(kartenObjekt.rarity) == "string" then
+                raritätInfo = "Rarität: " .. kartenObjekt.rarity
+            end
+        end
+        
+        print("Karten-ID: " .. kartenId .. ", Menge: " .. tostring(menge) .. ", " .. raritätInfo)
     end
     
-    print("------------------------------------")
-    print("Anzahl der unterschiedlichen Karten: " .. cardCount)
+    print("==================")
 end
 
--- Ausführung der Funktion mit einer kleinen Verzögerung, um sicherzustellen, dass alle Daten geladen sind
-wait(2)
-printAllUserCards()
+-- Funktion aufrufen
+alleKartenAusgeben()
