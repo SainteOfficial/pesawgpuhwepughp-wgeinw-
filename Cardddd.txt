@@ -1,105 +1,23 @@
--- LocalScript für Spieler-Inventar
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = game.Players.LocalPlayer
+local marketplaceService = game:GetService("MarketplaceService")
 
--- Funktion zum Anzeigen der Spieler-Items
-local function zeigeInventarItems()
-    local player = Players.LocalPlayer
-    
-    if not player then
-        print("Spieler nicht gefunden!")
-        return
+local function printPlayerItems()
+    -- Backpack-Items
+    print("=== BACKPACK ITEMS ===")
+    for _, item in pairs(player.Backpack:GetChildren()) do
+        print("- " .. item.Name .. " (Typ: " .. item.ClassName .. ")")
     end
     
-    print("------------- SPIELER INVENTAR -------------")
-    print("Spieler: " .. player.Name)
-    
-    -- Standard Roblox Backpack überprüfen
-    local backpack = player:FindFirstChildOfClass("Backpack")
-    if backpack then
-        print("\n=== STANDARD BACKPACK ITEMS ===")
-        local hatItems = 0
-        
-        for _, item in pairs(backpack:GetChildren()) do
-            if item:IsA("Tool") then
-                print("• Tool: " .. item.Name)
-            end
-        end
-        
-        if hatItems == 0 then
-            print("Keine Tools im Standard-Backpack gefunden.")
-        end
-    end
-    
-    -- Charakterinventar überprüfen (ausgerüstete Items)
+    -- Ausgerüstete Items (im Character)
+    print("\n=== AUSGERÜSTETE ITEMS ===")
     if player.Character then
-        print("\n=== AUSGERÜSTETE ITEMS ===")
-        local equippedItems = 0
-        
         for _, item in pairs(player.Character:GetChildren()) do
-            if item:IsA("Tool") then
-                print("• Ausgerüstet: " .. item.Name)
-                equippedItems = equippedItems + 1
-            elseif item:IsA("Accessory") then
-                print("• Accessory: " .. item.Name)
-                equippedItems = equippedItems + 1
+            if item:IsA("Tool") or item:IsA("Accessory") then
+                print("- " .. item.Name .. " (Typ: " .. item.ClassName .. ")")
             end
         end
-        
-        if equippedItems == 0 then
-            print("Keine ausgerüsteten Items gefunden.")
-        end
-    end
-    
-    -- Versuche zusätzlich auf das angepasste Backpack-System zuzugreifen
-    pcall(function()
-        local success, spielerItems = pcall(function()
-            -- Versuchen Sie, über die in den Spieldaten gespeicherten Items zuzugreifen
-            local spielerData = player:WaitForChild("leaderstats")
-            if spielerData and spielerData:FindFirstChild("Items") then
-                return spielerData.Items:GetChildren()
-            end
-            return {}
-        end)
-        
-        if success and #spielerItems > 0 then
-            print("\n=== SPIELERDATEN ITEMS ===")
-            for _, item in pairs(spielerItems) do
-                print("• Item: " .. item.Name)
-            end
-        end
-    end)
-    
-    print("------------------------------------------")
-end
-
--- Script ausführen, wenn der Spieler geladen ist
-Players.PlayerAdded:Connect(function(player)
-    if player == Players.LocalPlayer then
-        task.wait(2) -- Warten, bis alles geladen ist
-        zeigeInventarItems()
-    end
-end)
-
--- Falls der Spieler bereits geladen ist
-if Players.LocalPlayer then
-    task.wait(2)
-    zeigeInventarItems()
-end
-
--- Befehl zum manuellen Anzeigen der Items
-local function erstelleBefehlsfunktion()
-    local spielerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-    local chatGui = spielerGui:WaitForChild("Chat", 5)
-    
-    if chatGui then
-        chatGui.MessagePosted:Connect(function(nachricht)
-            if nachricht == "/inventar" or nachricht == "/items" then
-                zeigeInventarItems()
-            end
-        end)
-        print("Befehl '/inventar' oder '/items' verfügbar, um Inventar anzuzeigen")
     end
 end
 
-pcall(erstelleBefehlsfunktion)
+-- Funktion aufrufen
+printPlayerItems()
