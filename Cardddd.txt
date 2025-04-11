@@ -1,10 +1,13 @@
--- LocalScript für Backpack-Items
+-- LocalScript für Backpack-Items Anzeige
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 -- Module importieren
 local RuntimeLib = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+
+-- Die wichtigsten Module importieren
+local User = RuntimeLib.import(script, ReplicatedStorage, "TS", "user", "user").User
 local UserBackpack = RuntimeLib.import(script, ReplicatedStorage, "TS", "user", "backpack", "user-backpack").UserBackpack
 local ItemCategory = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", "item-category").ItemCategory
 
@@ -12,35 +15,53 @@ local ItemCategory = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", 
 local function printBackpackItems()
     local player = Players.LocalPlayer
     
-    -- Warten bis der Spieler geladen ist
     if not player then
-        player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+        print("Spieler nicht gefunden!")
+        return
     end
     
-    -- UserBackpack-Instanz erstellen
-    local backpack = UserBackpack.new(player)
+    -- User-Objekt erstellen (das ist der fehlende Schritt, der den getStructure-Fehler verursachte)
+    local success, userObject = pcall(function()
+        return User.fromPlayer(player)
+    end)
     
-    -- Alle Items abrufen
-    local items = backpack:getItems()
+    if not success or not userObject then
+        print("Konnte kein User-Objekt erstellen. Fehler:", userObject)
+        return
+    end
+    
+    -- UserBackpack-Instanz mit dem richtigen User-Objekt erstellen
+    local backpack = UserBackpack.new(userObject)
+    
+    -- Items sicher abrufen
+    local success, items = pcall(function()
+        return backpack:getItems()
+    end)
+    
+    if not success then
+        print("Fehler beim Abrufen der Backpack-Items:", items)
+        return
+    end
     
     -- Überprüfen ob Items vorhanden sind
-    if #items == 0 then
+    if not items or #items == 0 then
         print("Keine Items im Backpack gefunden!")
         return
     end
     
+    -- Alle Items ausgeben
     print("------------- BACKPACK ITEMS -------------")
     for _, item in pairs(items) do
-        -- Informationen über jedes Item ausgeben
+        -- Item-Daten sicher abrufen
         local itemData = item.item
         local quantity = item:getDocument().quantity
         
-        print("ID:", itemData.id)
+        print("ID:", itemData.id or "Unbekannt")
         print("Name:", itemData.name or "Unbekannt")
         print("Kategorie:", itemData.category or "Unbekannt")
-        print("Menge:", quantity)
+        print("Menge:", quantity or 0)
         
-        -- Überprüfen ob das Item ausgerüstet ist (HIER WURDE DER FEHLER BEHOBEN)
+        -- Überprüfen ob das Item ausgerüstet ist (HIER wurde "oder" zu "or" korrigiert)
         local equipStatus = "Nein"
         if item:isEquipped() or item.equipped then
             equipStatus = "Ja"
@@ -48,7 +69,9 @@ local function printBackpackItems()
         print("Ausgerüstet:", equipStatus)
         
         -- Spezielle Kategorien überprüfen
-        if itemData.category == ItemCategory.TITLE or itemData.category == ItemCategory.EQUIPMENT or itemData.category == ItemCategory.ARTIFACT then
+        if itemData.category == ItemCategory.TITLE or 
+           itemData.category == ItemCategory.EQUIPMENT or 
+           itemData.category == ItemCategory.ARTIFACT then
             print("Spezial-Kategorie:", itemData.category)
         end
         
