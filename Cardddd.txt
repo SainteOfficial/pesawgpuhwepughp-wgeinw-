@@ -1,274 +1,62 @@
--- 🎒 Skript zum Anzeigen der Items im benutzerdefinierten Backpack
+-- Erweitertes Script mit detaillierter Rarität-Ausgabe
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RuntimeLib = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+local UserInputService = game:GetService("UserInputService")
+local module = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+local LocalUser = module.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
+local Rarity = module.import(script, ReplicatedStorage, "TS", "rarity").Rarity
 
--- Notwendige Module importieren
-local LocalUser = RuntimeLib.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
-local ItemsWithId = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", "items").ItemsWithId
-local ItemCategory = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", "item-category").ItemCategory
-local Rarity = RuntimeLib.import(script, ReplicatedStorage, "TS", "rarity").Rarity
-
--- Kategorie-Emojis
-local CATEGORY_EMOJIS = {
-    POTION = "🧪",
-    TRAIT = "🧬",
-    TITLE = "👑",
-    EQUIPMENT = "⚔️",
-    ARTIFACT = "🔮",
-    INSTANT_ROLL = "🎲",
-    CARD_BACK = "🃏",
-    RAID = "🏰",
-    MISC = "📦"
-}
-
--- Seltenheits-Emojis
-local RARITY_EMOJIS = {
-    COMMON = "⚪",
-    UNCOMMON = "🟢",
-    RARE = "🔵",
-    EPIC = "🟣",
-    LEGENDARY = "🟠",
-    MYTHIC = "🔴"
-}
-
--- Gibt das passende Emoji für eine Kategorie zurück
-local function getCategoryEmoji(categoryName)
-    return CATEGORY_EMOJIS[categoryName] or "❓"
-end
-
--- Gibt das passende Emoji für eine Seltenheit zurück
-local function getRarityEmoji(rarityName)
-    return RARITY_EMOJIS[rarityName] or "❓"
-end
-
--- Erzeugt eine Trennlinie
-local function divider(length)
-    return string.rep("━", length or 50)
-end
-
--- Formatiert eine Überschrift
-local function header(text)
-    return "\n" .. divider() .. "\n✨ " .. text .. " ✨\n" .. divider()
-end
-
--- Funktion zum Anzeigen der Backpack-Items
-local function printBackpackItems()
-    print(header("BACKPACK INHALT"))
+local function alleKartenAusgeben()
+    print("=== DETAILLIERTE KARTENSAMMLUNG ===")
     
-    -- Backpack-Items aus der Atom-Map abrufen
-    local backpackItems = LocalUser.atomMap.player().backpack.items
+    local spielerKarten = LocalUser.atomMap.player().cards.content
     
-    -- Prüfen, ob Items vorhanden sind
-    local itemCount = 0
-    for _ in pairs(backpackItems) do
-        itemCount = itemCount + 1
-    end
-    
-    if itemCount == 0 then
-        print("📭 Keine Items im Backpack gefunden.")
-        return
-    end
-    
-    print("🔍 Gefunden: " .. itemCount .. " Items\n")
-    
-    -- Items nach Kategorie sortieren
-    local categorizedItems = {}
-    
-    for itemId, itemData in pairs(backpackItems) do
-        local itemInfo = ItemsWithId[itemId]
-        if itemInfo then
-            local categoryName = (itemInfo.category and itemInfo.category.name) or "UNKNOWN"
-            
-            if not categorizedItems[categoryName] then
-                categorizedItems[categoryName] = {}
-            end
-            
-            table.insert(categorizedItems[categoryName], {
-                id = itemId,
-                info = itemInfo,
-                data = itemData
-            })
-        end
-    end
-    
-    -- Items nach Kategorie ausgeben
-    for categoryName, items in pairs(categorizedItems) do
-        local emoji = getCategoryEmoji(categoryName)
-        print(emoji .. " " .. categoryName .. " (" .. #items .. ")")
+    for kartenId, kartenDaten in pairs(spielerKarten) do
+        local menge = type(kartenDaten) == "table" and kartenDaten.getAmount and kartenDaten:getAmount() or kartenDaten
         
-        -- Items innerhalb der Kategorie anzeigen
-        for _, item in ipairs(items) do
-            local rarityName = (item.info.rarity and item.info.rarity.name) or "UNKNOWN"
-            local rarityEmoji = getRarityEmoji(rarityName)
-            local equipped = (item.data.equipped and "✅") or "❌"
-            
-            print(string.format(
-                "  %s %s (×%d) %s",
-                rarityEmoji,
-                item.info.name,
-                item.data.quantity or 0,
-                equipped
-            ))
-        end
+        -- Karte mit allen Details abrufen
+        local karte = kartenDaten:getCard()
         
-        print("")
-    end
-end
-
--- Funktion zum Anzeigen aller ausgerüsteten Items
-local function printEquippedItems()
-    print(header("AUSGERÜSTETE ITEMS"))
-    
-    local equippedTitle = LocalUser.backpack:getEquippedTitle()
-    local equippedEquipment = LocalUser.backpack:getEquippedEquipment()
-    local equippedArtifact = LocalUser.backpack:getEquippedArtifact()
-    
-    local equipCount = 0
-    
-    if equippedTitle then
-        print("👑 Titel: " .. equippedTitle.item.name)
-        equipCount = equipCount + 1
-    end
-    
-    if equippedEquipment then
-        print("⚔️ Ausrüstung: " .. equippedEquipment.item.name)
-        equipCount = equipCount + 1
-    end
-    
-    if equippedArtifact then
-        print("🔮 Artefakt: " .. equippedArtifact.item.name)
-        equipCount = equipCount + 1
-    end
-    
-    if equipCount == 0 then
-        print("🔍 Keine Items ausgerüstet")
-    end
-end
-
--- Funktion zum Anzeigen ausführlicher Item-Details
-local function printDetailedItem(itemId)
-    local backpackItems = LocalUser.atomMap.player().backpack.items
-    local itemData = backpackItems[itemId]
-    
-    if not itemData then
-        print("❌ Item mit ID " .. itemId .. " nicht gefunden!")
-        return
-    end
-    
-    local itemInfo = ItemsWithId[itemId]
-    if not itemInfo then
-        print("❓ Keine Informationen für Item mit ID " .. itemId .. " verfügbar!")
-        return
-    end
-    
-    print(header("ITEM DETAILS"))
-    
-    local categoryName = (itemInfo.category and itemInfo.category.name) or "UNKNOWN"
-    local rarityName = (itemInfo.rarity and itemInfo.rarity.name) or "UNKNOWN"
-    
-    print("📋 Name: " .. itemInfo.name)
-    print("🔑 ID: " .. itemId)
-    print(getCategoryEmoji(categoryName) .. " Kategorie: " .. categoryName)
-    print(getRarityEmoji(rarityName) .. " Seltenheit: " .. rarityName)
-    print("🔢 Anzahl: " .. (itemData.quantity or 0))
-    print("🎽 Status: " .. (itemData.equipped and "Ausgerüstet ✅" or "Nicht ausgerüstet ❌"))
-    
-    if itemInfo.description then
-        print("📝 Beschreibung: " .. itemInfo.description)
-    end
-end
-
--- Funktion zum Anzeigen von Items nach Kategorie
-local function printItemsByCategory(category)
-    if not category then return end
-    
-    local categoryName = category.name
-    local emoji = getCategoryEmoji(categoryName)
-    
-    print(header(emoji .. " KATEGORIE: " .. categoryName))
-    
-    local backpackItems = LocalUser.atomMap.player().backpack.items
-    local found = false
-    local itemsInCategory = {}
-    
-    -- Items der Kategorie sammeln
-    for itemId, itemData in pairs(backpackItems) do
-        local itemInfo = ItemsWithId[itemId]
-        if itemInfo and itemInfo.category == category then
-            found = true
-            table.insert(itemsInCategory, {
-                id = itemId,
-                name = itemInfo.name,
-                rarity = itemInfo.rarity,
-                quantity = itemData.quantity or 0,
-                equipped = itemData.equipped
-            })
-        end
-    end
-    
-    -- Nach Seltenheit und Namen sortieren
-    table.sort(itemsInCategory, function(a, b)
-        if a.rarity.value ~= b.rarity.value then
-            return a.rarity.value > b.rarity.value -- Höhere Seltenheit zuerst
-        end
-        return a.name < b.name -- Alphabetisch nach Namen
-    end)
-    
-    if not found then
-        print("🔍 Keine Items in dieser Kategorie gefunden.")
-        return
-    end
-    
-    print("🔍 Gefunden: " .. #itemsInCategory .. " Items\n")
-    
-    -- Items ausgeben
-    for _, item in ipairs(itemsInCategory) do
-        local rarityEmoji = getRarityEmoji(item.rarity.name)
-        local equipped = (item.equipped and "✅") or "❌"
+        print("▶ KARTE: " .. (karte.name or kartenId))
+        print("  Menge: " .. tostring(menge))
         
-        print(string.format(
-            "%s %s (×%d) %s",
-            rarityEmoji,
-            item.name,
-            item.quantity,
-            equipped
-        ))
-    end
-end
-
--- Hauptfunktion zum Ausgeben aller Informationen
-local function printAllBackpackInfo()
-    printBackpackItems()
-    printEquippedItems()
-    
-    -- Alle Kategorien anzeigen (optional)
-    print(header("KATEGORIEÜBERSICHT"))
-    
-    -- Alle verfügbaren Kategorien durchgehen
-    for categoryName, emoji in pairs(CATEGORY_EMOJIS) do
-        local category = ItemCategory[categoryName]
-        if category then
-            local backpackItems = LocalUser.atomMap.player().backpack.items
-            local itemCount = 0
-            
-            -- Zählen, wie viele Items in dieser Kategorie sind
-            for itemId, _ in pairs(backpackItems) do
-                local itemInfo = ItemsWithId[itemId]
-                if itemInfo and itemInfo.category == category then
-                    itemCount = itemCount + 1
+        -- Rarität Informationen
+        if karte.rarity then
+            -- Rarität-Typ (Rainbow, Secret, etc.)
+            local raritätTyp = "Unbekannt"
+            for name, wert in pairs(Rarity) do
+                if karte.rarity == wert then
+                    raritätTyp = name
+                    break
                 end
             end
+            print("  Rarität-Typ: " .. raritätTyp)
             
-            print(string.format("%s %s: %d Items", emoji, categoryName, itemCount))
+            -- Numerische Rarität (1/100m etc.)
+            if karte.rarityOdds or karte.odds or karte.rarity.odds then
+                local odds = karte.rarityOdds or karte.odds or karte.rarity.odds
+                print("  Numerische Rarität: 1/" .. tostring(odds))
+            end
+            
+            -- Weitere Eigenschaften durchsuchen
+            for prop, value in pairs(karte) do
+                if string.find(string.lower(prop), "rarity") or string.find(string.lower(prop), "odds") or
+                   string.find(string.lower(prop), "chance") then
+                    print("  " .. prop .. ": " .. tostring(value))
+                end
+            end
         end
+        
+        print("") -- Leerzeile zwischen Karten
     end
+    
+    print("==================")
 end
 
--- Funktionen ausführen
-printAllBackpackInfo()
+-- Event-Handler für Tastendruck
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.P then
+        alleKartenAusgeben()
+    end
+end)
 
--- Um detaillierte Infos zu einer bestimmten Kategorie zu erhalten, kommentiere diese Zeile ein:
--- printItemsByCategory(ItemCategory.POTION)
-
--- Um detaillierte Infos zu einem bestimmten Item zu erhalten, ersetze "item_id_hier" und kommentiere diese Zeile ein:
--- printDetailedItem("item_id_hier")
+print("Drücke P, um deine detaillierte Kartensammlung anzuzeigen")
