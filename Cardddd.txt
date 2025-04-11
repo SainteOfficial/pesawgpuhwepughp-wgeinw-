@@ -1,80 +1,132 @@
--- Local Script zum Ausgeben aller Karten, Mengen und Raritäten (automatisch beim Ausführen)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local module = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-local LocalUser = module.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
-
--- Funktion zum Ausgeben aller Karten
-local function alleKartenAusgeben()
-    print("=== KARTENSAMMLUNG DES BENUTZERS ===")
+-- Sicheres Skript zum Ausgeben aller Karten und deren Eigenschaften
+local success, result = pcall(function()
+    -- Grundlegende Dienste und Module laden
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
     
-    -- Warten auf vollständiges Laden des LocalUser-Objekts und der Karten
-    while not LocalUser or not LocalUser.atomMap or not LocalUser.atomMap.player or not LocalUser.atomMap.player() do
-        task.wait(0.1)
-        print("Warte auf Spielerdaten...")
-    end
-    
-    local spielerKarten = LocalUser.atomMap.player().cards.content
-    if not spielerKarten then
-        print("Keine Kartendaten gefunden.")
+    -- Überprüfen, ob die Pfade existieren
+    if not ReplicatedStorage:FindFirstChild("rbxts_include") then
+        warn("rbxts_include nicht gefunden in ReplicatedStorage")
         return
     end
     
-    -- Durch alle Karten iterieren und sie ausgeben
-    for kartenId, kartenDaten in pairs(spielerKarten) do
-        local menge = 0
-        local kartenObjekt = nil
+    print("Module werden geladen...")
+    
+    -- Module sicher laden
+    local function safeRequire(path)
+        if not path then return nil end
+        local success, module = pcall(require, path)
+        if not success then
+            warn("Fehler beim Laden des Moduls:", module)
+            return nil
+        end
+        return module
+    end
+    
+    -- RuntimeLib laden
+    local runtimePath = ReplicatedStorage:FindFirstChild("rbxts_include"):FindFirstChild("RuntimeLib")
+    local module = safeRequire(runtimePath)
+    
+    if not module then
+        warn("RuntimeLib konnte nicht geladen werden")
+        return
+    end
+    
+    print("Module erfolgreich geladen, Daten werden abgerufen...")
+    
+    -- LocalUser sicher importieren
+    local function safeImport(...)
+        local success, result = pcall(function(...)
+            return module.import(...)
+        end, ...)
         
-        -- Verschiedene Datenstrukturen behandeln
+        if not success then
+            warn("Import fehlgeschlagen:", result)
+            return nil
+        end
+        return result
+    end
+    
+    local LocalUser = safeImport(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
+    
+    if not LocalUser then
+        warn("LocalUser konnte nicht importiert werden")
+        return
+    end
+    
+    print("LocalUser gefunden, Karten werden gesucht...")
+    
+    -- Sicher auf Kartendaten zugreifen
+    if not LocalUser.atomMap then
+        warn("atomMap nicht in LocalUser gefunden")
+        return
+    end
+    
+    local player = LocalUser.atomMap.player()
+    if not player then
+        warn("player() gibt nil zurück")
+        return
+    end
+    
+    if not player.cards then
+        warn("cards nicht in player gefunden")
+        return
+    end
+    
+    if not player.cards.content then
+        warn("content nicht in player.cards gefunden")
+        return
+    end
+    
+    local spielerKarten = player.cards.content
+    
+    -- Jetzt können wir sicher durch die Karten iterieren
+    print("=== KARTENSAMMLUNG DES BENUTZERS ===")
+    local kartenGezählt = 0
+    
+    for kartenId, kartenDaten in pairs(spielerKarten) do
+        kartenGezählt = kartenGezählt + 1
+        
+        local menge = 0
+        local rarität = "Unbekannt"
+        local name = kartenId
+        
+        -- Versuche Kartenmenge zu ermitteln
         if type(kartenDaten) == "table" then
-            if kartenDaten.getAmount then
+            if kartenDaten.getAmount and type(kartenDaten.getAmount) == "function" then
                 menge = kartenDaten:getAmount()
             end
             
-            if kartenDaten.getCard then
-                kartenObjekt = kartenDaten:getCard()
-            end
-        else
-            menge = kartenDaten -- Falls die Menge direkt gespeichert ist
-        end
-        
-        local raritätInfo = ""
-        
-        -- Rarität extrahieren, wenn verfügbar
-        if kartenObjekt and kartenObjekt.rarity then
-            -- Rarität-Typ
-            if type(kartenObjekt.rarity) == "table" then
-                if kartenObjekt.rarity.name then
-                    raritätInfo = "Typ: " .. tostring(kartenObjekt.rarity.name)
-                end
+            -- Versuche Kartenobjekt zu erhalten
+            if kartenDaten.getCard and type(kartenDaten.getCard) == "function" then
+                local kartenObjekt = kartenDaten:getCard()
                 
-                -- Numerische Rarität suchen (1/X)
-                local numerischeRarität = kartenObjekt.rarity.odds or 
-                                          kartenObjekt.rarity.chance or 
-                                          kartenObjekt.rarity.rarity or 
-                                          kartenObjekt.rarity.rate or
-                                          kartenObjekt.rarityOdds or
-                                          kartenObjekt.odds
-                
-                if numerischeRarität then
-                    if raritätInfo ~= "" then
-                        raritätInfo = raritätInfo .. ", "
+                if kartenObjekt then
+                    -- Name der Karte holen, falls verfügbar
+                    if kartenObjekt.name then
+                        name = kartenObjekt.name
                     end
-                    raritätInfo = raritätInfo .. "Rarität: 1/" .. tostring(numerischeRarität)
+                    
+                    -- Rarität extrahieren, wenn verfügbar
+                    if kartenObjekt.rarity then
+                        if type(kartenObjekt.rarity) == "table" then
+                            if kartenObjekt.rarity.odds then
+                                rarität = "1/" .. tostring(kartenObjekt.rarity.odds)
+                            elseif kartenObjekt.rarity.chance then
+                                rarität = "1/" .. tostring(kartenObjekt.rarity.chance)
+                            end
+                        end
+                    end
                 end
-            elseif type(kartenObjekt.rarity) == "string" then
-                raritätInfo = "Rarität: " .. kartenObjekt.rarity
             end
         end
         
-        -- Name der Karte, falls verfügbar
-        local kartenName = kartenObjekt and kartenObjekt.name or kartenId
-        
-        print("Karte: " .. tostring(kartenName) .. ", Menge: " .. tostring(menge) .. 
-              (raritätInfo ~= "" and (", " .. raritätInfo) or ""))
+        print(string.format("Karte: %s | Menge: %d | Rarität: %s", name, menge, rarität))
     end
     
+    print("Insgesamt " .. kartenGezählt .. " verschiedene Karten gefunden")
     print("==================")
-end
+end)
 
--- Direkt ausführen, ohne auf Tastendruck zu warten
-alleKartenAusgeben()
+if not success then
+    warn("Fehler beim Ausführen des Skripts: " .. tostring(result))
+end
