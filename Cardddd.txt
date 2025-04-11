@@ -1,52 +1,128 @@
--- Local Script zum Ausgeben aller Karten, Mengen und Raritäten
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local module = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-local LocalUser = module.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
+local RuntimeLib = ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib")
+local module = require(RuntimeLib)
 
-local function alleKartenAusgeben()
-    print("=== Kartensammlung des Benutzers mit Raritäten ===")
-    
-    -- Zugriff auf die Karten des Spielers
-    local spielerKarten = LocalUser.atomMap.player().cards.content
-    
-    -- Durch alle Karten iterieren und sie ausgeben
-    for kartenId, kartenDaten in pairs(spielerKarten) do
-        local menge = kartenDaten
-        
-        -- Falls es ein Objekt mit einer getAmount-Methode ist, diese verwenden
-        if type(kartenDaten) == "table" or type(kartenDaten) == "userdata" then
-            if kartenDaten.getAmount then
-                menge = kartenDaten:getAmount()
-            end
-        end
-        
-        -- Karte abrufen, um Rarität zu erhalten
-        local kartenObjekt = kartenDaten:getCard()
-        local raritätInfo = ""
-        
-        -- Versuche alle möglichen Rarität-Eigenschaften zu finden
-        if kartenObjekt and kartenObjekt.rarity then
-            if kartenObjekt.rarity.name then
-                raritätInfo = raritätInfo .. "Typ: " .. kartenObjekt.rarity.name
-            end
-            
-            -- Numerische Rarität (1/100m etc.)
-            if kartenObjekt.rarity.odds or kartenObjekt.rarity.chance or kartenObjekt.rarity.rarity then
-                local numerischeRarität = kartenObjekt.rarity.odds or kartenObjekt.rarity.chance or kartenObjekt.rarity.rarity
-                raritätInfo = raritätInfo .. ", Rarität: 1/" .. tostring(numerischeRarität)
-            end
-            
-            -- Fallback, wenn keine spezifische Rarität gefunden wurde
-            if raritätInfo == "" and type(kartenObjekt.rarity) == "string" then
-                raritätInfo = "Rarität: " .. kartenObjekt.rarity
-            end
-        end
-        
-        print("Karten-ID: " .. kartenId .. ", Menge: " .. tostring(menge) .. ", " .. raritätInfo)
+-- Import required modules
+local LocalUser = module.import(script, ReplicatedStorage, "TS", "user", "local", "local-user").LocalUser
+local Cards = module.import(script, ReplicatedStorage, "TS", "card", "cards").Cards
+local UserCard = module.import(script, ReplicatedStorage, "TS", "user", "card", "user-card").UserCard
+local Stat = module.import(script, ReplicatedStorage, "TS", "stat", "stat").Stat
+
+-- Function to safely print values of any type
+local function safePrint(name, value)
+    if value == nil then
+        print(name .. ": nil")
+        return
     end
     
-    print("==================")
+    if type(value) == "function" then
+        print(name .. ": [Function]")
+    elseif type(value) == "table" and name ~= "__index" then
+        print(name .. ": [Table]")
+    else
+        print(name .. ": " .. tostring(value))
+    end
 end
 
--- Funktion aufrufen
-alleKartenAusgeben()
+-- Function to print detailed information about a card
+local function printCardInfo(userCard)
+    local card = userCard:getCard()
+    
+    print("\n========== CARD: " .. card.id .. " ==========")
+    
+    -- Basic card information
+    print("\n--- BASIC INFO ---")
+    safePrint("Name", card.name)
+    safePrint("ID", card.id)
+    safePrint("Amount", userCard:getAmount())
+    safePrint("Rarity", card.rarity)
+    safePrint("Is Support", card.isSupport)
+    safePrint("Denominator", card.denominator)
+    
+    -- Stats information
+    print("\n--- STATS ---")
+    pcall(function()
+        if type(card.getStat) == "function" then
+            for _, statType in pairs(Stat) do
+                if type(statType) ~= "function" then
+                    safePrint("Stat(" .. tostring(statType) .. ")", card:getStat(statType))
+                end
+            end
+        end
+    end)
+    
+    -- Deck status
+    print("\n--- DECK STATUS ---")
+    pcall(function()
+        safePrint("In Party", LocalUser.deck:isCardInParty(userCard))
+        
+        local followingCard = LocalUser.deck:getFollowingCard()
+        safePrint("Is Following Card", followingCard and followingCard.id == card.id)
+        
+        if type(card.hasFollowEffect) == "function" then
+            safePrint("Has Follow Effect", card:hasFollowEffect())
+        end
+    end)
+    
+    -- All card properties
+    print("\n--- ALL CARD PROPERTIES ---")
+    for key, value in pairs(card) do
+        safePrint(key, value)
+    end
+    
+    -- All UserCard properties
+    print("\n--- ALL USERCARD PROPERTIES ---")
+    for key, value in pairs(userCard) do
+        safePrint(key, value)
+    end
+end
+
+-- Function to get all cards (real or mock)
+local function getAllCards()
+    local cards = {}
+    local useRealCards = false
+    
+    -- Try to get real user cards
+    pcall(function()
+        local userCards = LocalUser.deck:getCards()
+        if next(userCards) ~= nil then
+            useRealCards = true
+            for _, card in pairs(userCards) do
+                table.insert(cards, card)
+            end
+        end
+    end)
+    
+    -- If no real cards found, use mock cards
+    if not useRealCards then
+        print("No real cards found. Using mock cards.")
+        for _, card in pairs(Cards) do
+            table.insert(cards, UserCard.new(nil, card, 1))
+        end
+    else
+        print("Using real user cards.")
+    end
+    
+    return cards
+end
+
+-- Main function to print all cards
+local function printAllUserCards()
+    print("\n============================================")
+    print("         ALL USER CARDS INFORMATION         ")
+    print("============================================")
+    
+    local cards = getAllCards()
+    print("Total cards: " .. #cards)
+    
+    for i, userCard in ipairs(cards) do
+        printCardInfo(userCard)
+    end
+    
+    print("\n============================================")
+    print("           END OF USER CARDS                ")
+    print("============================================")
+end
+
+-- Execute the function
+printAllUserCards()
