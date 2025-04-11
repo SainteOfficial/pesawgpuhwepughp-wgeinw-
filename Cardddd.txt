@@ -1,141 +1,71 @@
--- Verbesserter RemoteEvent-Monitor (ohne nil-Fehler)
-local success, result = pcall(function()
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local remoteEvent = ReplicatedStorage:WaitForChild("3aA"):WaitForChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29")
-    
-    -- GUI erstellen
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "RemoteMonitor"
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- LocalScript für Backpack-Items
 
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 300, 0, 200)
-    Frame.Position = UDim2.new(0, 10, 0, 10)
-    Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Frame.BackgroundTransparency = 0.3
-    Frame.BorderSizePixel = 0
-    Frame.Parent = ScreenGui
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.Position = UDim2.new(0, 0, 0, 0)
-    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 14
-    Title.Text = "RemoteEvent Monitor"
-    Title.Parent = Frame
+-- Module importieren
+local RuntimeLib = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+local UserBackpack = RuntimeLib.import(script, ReplicatedStorage, "TS", "user", "backpack", "user-backpack").UserBackpack
+local ItemCategory = RuntimeLib.import(script, ReplicatedStorage, "TS", "item", "item-category").ItemCategory
 
-    local StatsText = Instance.new("TextLabel")
-    StatsText.Size = UDim2.new(1, -10, 1, -40)
-    StatsText.Position = UDim2.new(0, 5, 0, 35)
-    StatsText.BackgroundTransparency = 1
-    StatsText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    StatsText.TextSize = 12
-    StatsText.Text = "RemoteEvent gefunden: " .. remoteEvent:GetFullName()
-    StatsText.TextXAlignment = Enum.TextXAlignment.Left
-    StatsText.TextYAlignment = Enum.TextYAlignment.Top
-    StatsText.Parent = Frame
+-- Funktion zum Anzeigen der Backpack-Items
+local function printBackpackItems()
+    local player = Players.LocalPlayer
     
-    -- Statistik
-    local aufrufe = 0
-    
-    -- Eingehende Events überwachen
-    remoteEvent.OnClientEvent:Connect(function(...)
-        local args = {...}
-        aufrufe = aufrufe + 1
-        
-        -- Aktualisiere GUI und Console
-        local ausgabe = "=== EINGEHEND (Server → Client) ===\n"
-        ausgabe = ausgabe .. "Zeit: " .. os.date("%H:%M:%S") .. "\n"
-        ausgabe = ausgabe .. "Aufruf #: " .. aufrufe .. "\n"
-        
-        if #args > 0 then
-            ausgabe = ausgabe .. "Parameter:\n"
-            for i, arg in ipairs(args) do
-                ausgabe = ausgabe .. "  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg) .. "\n"
-            end
-        else
-            ausgabe = ausgabe .. "Keine Parameter\n"
-        end
-        
-        print(ausgabe)
-        StatsText.Text = ausgabe
-    end)
-    
-    -- Ausgehende Events überwachen mit hookmetamethod
-    if hookmetamethod then
-        local oldNamecall
-        oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-            local args = {...}
-            local method = getnamecallmethod()
-            
-            if self == remoteEvent and method == "FireServer" then
-                aufrufe = aufrufe + 1
-                
-                -- Ausgabe erstellen
-                local ausgabe = "=== AUSGEHEND (Client → Server) ===\n"
-                ausgabe = ausgabe .. "Zeit: " .. os.date("%H:%M:%S") .. "\n"
-                ausgabe = ausgabe .. "Aufruf #: " .. aufrufe .. "\n"
-                
-                if #args > 0 then
-                    ausgabe = ausgabe .. "Parameter:\n"
-                    for i, arg in ipairs(args) do
-                        ausgabe = ausgabe .. "  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg) .. "\n"
-                    end
-                else
-                    ausgabe = ausgabe .. "Keine Parameter\n"
-                end
-                
-                print(ausgabe)
-                StatsText.Text = ausgabe
-            end
-            
-            return oldNamecall(self, ...)
-        end)
-    else
-        -- Fallback für Plattformen, die hookmetamethod nicht unterstützen
-        local originalFireServer = remoteEvent.FireServer
-        remoteEvent.FireServer = function(self, ...)
-            aufrufe = aufrufe + 1
-            
-            -- Ausgabe erstellen
-            local ausgabe = "=== AUSGEHEND (Client → Server) ===\n"
-            ausgabe = ausgabe .. "Zeit: " .. os.date("%H:%M:%S") .. "\n"
-            ausgabe = ausgabe .. "Aufruf #: " .. aufrufe .. "\n"
-            
-            local args = {...}
-            if #args > 0 then
-                ausgabe = ausgabe .. "Parameter:\n"
-                for i, arg in ipairs(args) do
-                    ausgabe = ausgabe .. "  " .. i .. ": [" .. typeof(arg) .. "] " .. tostring(arg) .. "\n"
-                end
-            else
-                ausgabe = ausgabe .. "Keine Parameter\n"
-            end
-            
-            print(ausgabe)
-            StatsText.Text = ausgabe
-            
-            return originalFireServer(self, ...)
-        end
+    -- Warten bis der Spieler geladen ist
+    if not player then
+        player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
     end
     
-    print("RemoteEvent-Monitor erfolgreich gestartet!")
+    -- UserBackpack-Instanz erstellen
+    local backpack = UserBackpack.new(player)
+    
+    -- Alle Items abrufen
+    local items = backpack:getItems()
+    
+    -- Überprüfen ob Items vorhanden sind
+    if #items == 0 then
+        print("Keine Items im Backpack gefunden!")
+        return
+    end
+    
+    print("------------- BACKPACK ITEMS -------------")
+    for _, item in pairs(items) do
+        -- Informationen über jedes Item ausgeben
+        local itemData = item.item
+        local quantity = item:getDocument().quantity
+        
+        print("ID:", itemData.id)
+        print("Name:", itemData.name or "Unbekannt")
+        print("Kategorie:", itemData.category or "Unbekannt")
+        print("Menge:", quantity)
+        
+        -- Überprüfen ob das Item ausgerüstet ist (HIER WURDE DER FEHLER BEHOBEN)
+        local equipStatus = "Nein"
+        if item:isEquipped() or item.equipped then
+            equipStatus = "Ja"
+        end
+        print("Ausgerüstet:", equipStatus)
+        
+        -- Spezielle Kategorien überprüfen
+        if itemData.category == ItemCategory.TITLE or itemData.category == ItemCategory.EQUIPMENT or itemData.category == ItemCategory.ARTIFACT then
+            print("Spezial-Kategorie:", itemData.category)
+        end
+        
+        print("---------------------------------------")
+    end
+end
+
+-- Skript bei Spielerbeitritt ausführen
+Players.PlayerAdded:Connect(function(player)
+    if player == Players.LocalPlayer then
+        task.wait(1)
+        printBackpackItems()
+    end
 end)
 
-if not success then
-    warn("FEHLER: " .. tostring(result))
-    
-    -- Diagnose
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    if ReplicatedStorage:FindFirstChild("3aA") then
-        print("- '3aA' existiert")
-        if ReplicatedStorage:FindFirstChild("3aA"):FindFirstChild("8c5664e6-c89f-45fb-9903-0208dfc1fe29") then
-            print("- RemoteEvent existiert")
-        else
-            print("- RemoteEvent existiert NICHT")
-        end
-    else
-        print("- '3aA' existiert NICHT")
-    end
+-- Falls der Spieler bereits geladen ist
+if Players.LocalPlayer then
+    task.wait(1)
+    printBackpackItems()
 end
