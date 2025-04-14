@@ -26,6 +26,11 @@ local MythKeySystem = {}
 MythKeySystem.KeyIsValid = KeyIsValid
 MythKeySystem.GetKeyLink = GetKeyLink
 
+-- Diese Funktion wird von MythHub.lua aufgerufen
+function MythKeySystem.initialize()
+    return MythKeySystem.ValidateKey()
+end
+
 -- UI elements and animations for the key system
 function MythKeySystem.CreateKeyUI()
     -- Main player variables

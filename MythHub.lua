@@ -4,13 +4,22 @@ local success, MythKeySystem = pcall(function()
 end)
 
 if not success then
-    -- Fallback-Meldung, wenn MythKeySystem nicht geladen werden kann
+    -- Verbesserte Fehlerbehandlung
+    warn("MythKeySystem konnte nicht geladen werden: " .. tostring(MythKeySystem))
     game.Players.LocalPlayer:Kick("MythKeySystem konnte nicht geladen werden. Bitte überprüfe die Internetverbindung oder kontaktiere den Entwickler.")
     return
 end
 
 -- Key validieren mit dem neuen KeySystem
-local isKeyValid = MythKeySystem.initialize()
+local keyValidationSuccess, isKeyValid = pcall(function()
+    return MythKeySystem.initialize()
+end)
+
+if not keyValidationSuccess then
+    warn("Fehler bei der Key-Validierung: " .. tostring(isKeyValid))
+    game.Players.LocalPlayer:Kick("Fehler bei der Key-Validierung. Bitte kontaktiere den Entwickler.")
+    return
+end
 
 if not isKeyValid then
     -- Beende das Script, wenn der Key nicht gültig ist
