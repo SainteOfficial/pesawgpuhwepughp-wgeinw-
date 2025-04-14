@@ -1,11 +1,11 @@
 -- KeySystem laden
 local success, MythKeySystem = pcall(function()
-    return loadstring(readfile("MythKeySystem.lua"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/SainteOfficial/pesawgpuhwepughp-wgeinw-/refs/heads/master/MythKeySystem.lua"))()
 end)
 
 if not success then
     -- Fallback-Meldung, wenn MythKeySystem nicht geladen werden kann
-    game.Players.LocalPlayer:Kick("MythKeySystem konnte nicht geladen werden. Bitte stelle sicher, dass die Datei im richtigen Verzeichnis liegt.")
+    game.Players.LocalPlayer:Kick("MythKeySystem konnte nicht geladen werden. Bitte überprüfe die Internetverbindung oder kontaktiere den Entwickler.")
     return
 end
 
