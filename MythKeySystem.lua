@@ -1,731 +1,872 @@
-local KeyGuardLibrary = loadstring(game:HttpGet("https://cdn.keyguardian.org/library/v1.0.0.lua"))()
+local KeyGuardLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/MaGiXxScripter0/keysystem/master/KeyGuard.lua"))()
 
--- Daten für die Validierung
-local trueData = "85eea4d090ee43d99ef357eaecaae134"
-local falseData = "7abb4acc362d4d119602450c5a6e4a82"
+-- Key System Configurations
+local publicToken = "m4gixscrpter"
+local privateToken = "0v9ASD90vas90vDSAOvjdsa90VDSOAVDSOJA(DJSa90vjdsaVDSAojvdas90VDSJADSAV"
+local trueData = "mythhub authorized"
+local falseData = ""
+local logoUrl = "https://raw.githubusercontent.com/SainteOfficial/pesawgpuhwepughp-wgeinw-/refs/heads/master/MYTHLOGO.png"
+local fadeInSpeed = 0.6
+local fadeOutSpeed = 0.8
 
--- KeyGuardian-Setup
-KeyGuardLibrary.Set({
-    publicToken = "ca02dc6077074a89b877349f9b9894ab",
-    privateToken = "cc60f57a2fe1409187d2677d9c3f5242",
-    trueData = trueData,
-    falseData = falseData,
-})
+-- Create the key system object
+local KeySystem = KeyGuardLibrary:CreateKeySystem(publicToken, privateToken, trueData, falseData)
 
--- Standardkey
-local defaultKey = "prefis8b03e264f1244d7da9db6149389aa1bf"
+-- Functions for the key system
+local function GetKeyLink()
+    return KeySystem:GetLink()
+end
 
--- Exportiere Funktionen für MythHub.lua
+local function KeyIsValid(key)
+    return KeySystem:VerifyKey(key)
+end
+
+-- Export the key system object
 local MythKeySystem = {}
+MythKeySystem.KeyIsValid = KeyIsValid
+MythKeySystem.GetKeyLink = GetKeyLink
 
--- Standardfunktionen
-MythKeySystem.getKeyLink = function()
-    return KeyGuardLibrary.getLink()
-end
-
-MythKeySystem.validateKey = function(key)
-    local response = KeyGuardLibrary.validateDefaultKey(key or defaultKey)
-    return response == trueData
-end
-
-MythKeySystem.isKeyValid = false
-
--- Premium KeySystem im minimalistischen Design
-MythKeySystem.initialize = function(savedKey)
+-- UI elements and animations for the key system
+function MythKeySystem.CreateKeyUI()
+    -- Main player variables
+    local player = game.Players.LocalPlayer
+    local mouse = player:GetMouse()
+    
     -- Services
     local TweenService = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
     local UserInputService = game:GetService("UserInputService")
     
-    -- Hauptfunktion für das KeySystem
-    -- Erstelle die UI für das KeySystem
-    local KeySystemUI = Instance.new("ScreenGui")
-    KeySystemUI.Name = "MythKeySystemUI"
-    KeySystemUI.ResetOnSpawn = false
-    KeySystemUI.IgnoreGuiInset = true
-    KeySystemUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    KeySystemUI.DisplayOrder = 999
+    -- Create the ScreenGUI
+    local keySystemGui = Instance.new("ScreenGui")
+    keySystemGui.Name = "MythKeySystem"
+    keySystemGui.IgnoreGuiInset = true
+    keySystemGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    keySystemGui.ResetOnSpawn = false
+    keySystemGui.Parent = player.PlayerGui
     
-    -- Parent kann CoreGui oder PlayerGui sein
-    pcall(function()
-        KeySystemUI.Parent = game:GetService("CoreGui")
-    end)
-    if not KeySystemUI.Parent then
-        KeySystemUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    -- Create the background with enhanced blur effect
+    local background = Instance.new("Frame")
+    background.Name = "Background"
+    background.Size = UDim2.new(1, 0, 1, 0)
+    background.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    background.BackgroundTransparency = 0.3
+    background.BorderSizePixel = 0
+    background.Parent = keySystemGui
+    
+    -- Add blur effect
+    local blurEffect = Instance.new("BlurEffect")
+    blurEffect.Size = 15
+    blurEffect.Parent = game:GetService("Lighting")
+    
+    -- Add atmospheric particles
+    local particles = Instance.new("Frame")
+    particles.Name = "Particles"
+    particles.Size = UDim2.new(1, 0, 1, 0)
+    particles.BackgroundTransparency = 1
+    particles.BorderSizePixel = 0
+    particles.Parent = keySystemGui
+    particles.ZIndex = 2
+    
+    -- Generate particle elements
+    for i = 1, 30 do
+        local particle = Instance.new("Frame")
+        particle.Name = "Particle_" .. i
+        particle.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
+        particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        particle.BackgroundColor3 = Color3.fromRGB(
+            math.random(180, 255),
+            math.random(180, 255),
+            math.random(200, 255)
+        )
+        particle.BackgroundTransparency = math.random(40, 80)/100
+        particle.BorderSizePixel = 0
+        particle.ZIndex = 2
+        
+        -- Round corners for particles
+        local particleCorner = Instance.new("UICorner")
+        particleCorner.CornerRadius = UDim.new(1, 0)
+        particleCorner.Parent = particle
+        
+        particle.Parent = particles
+        
+        -- Animate particles
+        spawn(function()
+            while particle.Parent do
+                local duration = math.random(3, 8)
+                local targetPos = UDim2.new(math.random(), 0, math.random(), 0)
+                TweenService:Create(
+                    particle, 
+                    TweenInfo.new(duration, Enum.EasingStyle.Linear), 
+                    {Position = targetPos, BackgroundTransparency = math.random(40, 80)/100}
+                ):Play()
+                wait(duration)
+            end
+        end)
     end
     
-    -- Blur-Effekt
-    local BlurEffect = Instance.new("BlurEffect")
-    BlurEffect.Size = 0
-    BlurEffect.Parent = game:GetService("Lighting")
+    -- Main container for all UI elements with enhanced 3D effect
+    local mainContainer = Instance.new("Frame")
+    mainContainer.Name = "MainContainer"
+    mainContainer.Size = UDim2.new(0, 420, 0, 520)
+    mainContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    mainContainer.BorderSizePixel = 0
+    mainContainer.BackgroundTransparency = 0.05
+    mainContainer.Parent = keySystemGui
+    mainContainer.ZIndex = 5
     
-    -- Animiere Blur
-    TweenService:Create(BlurEffect, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = 20}):Play()
+    -- Rounded corners for the container
+    local cornerRadius = Instance.new("UICorner")
+    cornerRadius.CornerRadius = UDim.new(0, 20)
+    cornerRadius.Parent = mainContainer
     
-    -- Background Image mit Parallax-Effekt
-    local BackgroundImage = Instance.new("ImageLabel")
-    BackgroundImage.Name = "BackgroundImage"
-    BackgroundImage.Size = UDim2.new(1.2, 0, 1.2, 0) -- Größer für Parallax-Effekt
-    BackgroundImage.Position = UDim2.new(0.5, 0, 0.5, 0)
-    BackgroundImage.AnchorPoint = Vector2.new(0.5, 0.5)
-    BackgroundImage.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    BackgroundImage.Image = "rbxassetid://13928991786" -- Anime city
-    BackgroundImage.ImageTransparency = 0
-    BackgroundImage.ScaleType = Enum.ScaleType.Crop
-    BackgroundImage.Parent = KeySystemUI
-    
-    -- Animiere Hintergrundbild
-    TweenService:Create(BackgroundImage, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {ImageTransparency = 0.2}):Play()
-    
-    -- Parallax-Effekt für den Hintergrund
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mousePos = UserInputService:GetMouseLocation()
-            local viewportSize = workspace.CurrentCamera.ViewportSize
-            
-            local xOffset = (mousePos.X / viewportSize.X) - 0.5
-            local yOffset = (mousePos.Y / viewportSize.Y) - 0.5
-            
-            TweenService:Create(BackgroundImage, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0.5 - (xOffset * 0.05), 0, 0.5 - (yOffset * 0.05), 0)
-            }):Play()
-        end
-    end)
-    
-    -- Animation für sanftes Zoomen des Hintergrunds
-    spawn(function()
-        local originalSize = UDim2.new(1.2, 0, 1.2, 0)
-        local zoomedSize = UDim2.new(1.25, 0, 1.25, 0)
-        
-        while KeySystemUI.Parent do
-            TweenService:Create(BackgroundImage, TweenInfo.new(15, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = zoomedSize}):Play()
-            wait(15)
-            TweenService:Create(BackgroundImage, TweenInfo.new(15, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = originalSize}):Play()
-            wait(15)
-        end
-    end)
-    
-    -- Blur-Overlay anstatt Dark-Overlay für Glasmorphism-Effekt
-    local BlurOverlay = Instance.new("Frame")
-    BlurOverlay.Name = "BlurOverlay"
-    BlurOverlay.Size = UDim2.new(1, 0, 1, 0)
-    BlurOverlay.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
-    BlurOverlay.BackgroundTransparency = 1
-    BlurOverlay.BorderSizePixel = 0
-    BlurOverlay.Parent = KeySystemUI
-    
-    -- Animiere Blur-Overlay
-    TweenService:Create(BlurOverlay, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {BackgroundTransparency = 0.65}):Play()
-    
-    -- Füge Partikel für Dynamik hinzu
-    spawn(function()
-        for i = 1, 30 do
-            local particle = Instance.new("Frame")
-            particle.Name = "Particle" .. i
-            particle.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
-            particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
-            particle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            particle.BackgroundTransparency = math.random(7, 9) / 10
-            particle.BorderSizePixel = 0
-            particle.ZIndex = 2
-            particle.Parent = BlurOverlay
-            
-            local cornerRadius = Instance.new("UICorner")
-            cornerRadius.CornerRadius = UDim.new(1, 0)
-            cornerRadius.Parent = particle
-            
-            spawn(function()
-                local speed = math.random(10, 40) / 1000
-                local direction = math.random() > 0.5 and 1 or -1
-                
-                while KeySystemUI.Parent do
-                    particle.Position = UDim2.new(
-                        particle.Position.X.Scale,
-                        0,
-                        (particle.Position.Y.Scale + (speed * direction)) % 1,
-                        0
-                    )
-                    particle.Rotation = particle.Rotation + (speed * 50)
-                    wait()
-                end
-            end)
-        end
-    end)
-    
-    -- Main Container
-    local MainContainer = Instance.new("Frame")
-    MainContainer.Name = "MainContainer"
-    MainContainer.Size = UDim2.new(0, 0, 0, 0)
-    MainContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
-    MainContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-    MainContainer.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
-    MainContainer.BackgroundTransparency = 1
-    MainContainer.BorderSizePixel = 0
-    MainContainer.ClipsDescendants = true
-    MainContainer.Parent = KeySystemUI
-    
-    -- Abgerundete Ecken für den Container
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 12)
-    UICorner.Parent = MainContainer
-    
-    -- Animiere Container Erscheinen
-    TweenService:Create(MainContainer, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.new(0, 400, 0, 260),
-        BackgroundTransparency = 0.2
-    }):Play()
-    
-    -- Inneres Glow für den Container
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Color = Color3.fromRGB(60, 80, 255)
-    UIStroke.Thickness = 1.5
-    UIStroke.Transparency = 1
-    UIStroke.Parent = MainContainer
-    
-    -- Animiere Glow
-    TweenService:Create(UIStroke, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Transparency = 0.7}):Play()
-    
-    -- Animiere UIStroke Farbe
-    spawn(function()
-        local hue = 0
-        
-        while KeySystemUI.Parent do
-            hue = (hue + 0.001) % 1
-            UIStroke.Color = Color3.fromHSV(hue, 0.8, 1)
-            RunService.RenderStepped:Wait()
-        end
-    end)
-    
-    -- Glaseffekt
-    local GlassOverlay = Instance.new("Frame")
-    GlassOverlay.Name = "GlassOverlay"
-    GlassOverlay.Size = UDim2.new(1, 0, 1, 0)
-    GlassOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    GlassOverlay.BackgroundTransparency = 0.94
-    GlassOverlay.BorderSizePixel = 0
-    GlassOverlay.Parent = MainContainer
-    
-    -- Header mit Titel
-    local HeaderContainer = Instance.new("Frame")
-    HeaderContainer.Name = "HeaderContainer"
-    HeaderContainer.Size = UDim2.new(1, 0, 0, 70)
-    HeaderContainer.BackgroundTransparency = 1
-    HeaderContainer.Parent = MainContainer
-    
-    -- Drei Punkte
-    local DotsContainer = Instance.new("Frame")
-    DotsContainer.Name = "DotsContainer"
-    DotsContainer.Size = UDim2.new(1, 0, 0, 20)
-    DotsContainer.Position = UDim2.new(0, 0, 0, 10)
-    DotsContainer.BackgroundTransparency = 1
-    DotsContainer.Parent = HeaderContainer
-    
-    -- Erstelle die drei Punkte
-    for i = 1, 3 do
-        local Dot = Instance.new("Frame")
-        Dot.Name = "Dot" .. i
-        Dot.Size = UDim2.new(0, 4, 0, 4)
-        Dot.Position = UDim2.new(0.5, (i-2) * 8, 0.5, 0)
-        Dot.AnchorPoint = Vector2.new(0.5, 0.5)
-        Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Dot.BackgroundTransparency = 1
-        Dot.BorderSizePixel = 0
-        
-        local UICornerDot = Instance.new("UICorner")
-        UICornerDot.CornerRadius = UDim.new(1, 0)
-        UICornerDot.Parent = Dot
-        
-        Dot.Parent = DotsContainer
-        
-        -- Animiere das Erscheinen der Punkte
-        TweenService:Create(Dot, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.1 * i), {
-            BackgroundTransparency = 0.2
-        }):Play()
-    end
-    
-    -- Titel
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Name = "Title"
-    TitleLabel.Size = UDim2.new(1, 0, 0, 30)
-    TitleLabel.Position = UDim2.new(0, 0, 0, 30)
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.Text = "MYTHHUB PREMIUM"
-    TitleLabel.TextSize = 22
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.TextTransparency = 1
-    TitleLabel.Parent = HeaderContainer
-    
-    -- Animiere Titel
-    TweenService:Create(TitleLabel, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.3), {
-        TextTransparency = 0
-    }):Play()
-    
-    -- Untertitel
-    local SubtitleLabel = Instance.new("TextLabel")
-    SubtitleLabel.Name = "Subtitle"
-    SubtitleLabel.Size = UDim2.new(1, 0, 0, 20)
-    SubtitleLabel.Position = UDim2.new(0, 0, 0, 55)
-    SubtitleLabel.Font = Enum.Font.Gotham
-    SubtitleLabel.Text = "AUTHENTICATION SYSTEM"
-    SubtitleLabel.TextSize = 12
-    SubtitleLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-    SubtitleLabel.BackgroundTransparency = 1
-    SubtitleLabel.TextTransparency = 1
-    SubtitleLabel.Parent = HeaderContainer
-    
-    -- Animiere Untertitel
-    TweenService:Create(SubtitleLabel, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.4), {
-        TextTransparency = 0
-    }):Play()
-    
-    -- Key Input Box
-    local KeyInputContainer = Instance.new("Frame")
-    KeyInputContainer.Name = "KeyInputContainer"
-    KeyInputContainer.Size = UDim2.new(0.85, 0, 0, 45)
-    KeyInputContainer.Position = UDim2.new(0.5, 0, 0, 100)
-    KeyInputContainer.AnchorPoint = Vector2.new(0.5, 0)
-    KeyInputContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
-    KeyInputContainer.BackgroundTransparency = 1
-    KeyInputContainer.BorderSizePixel = 0
-    KeyInputContainer.Parent = MainContainer
-    
-    -- Abgerundete Ecken für Input
-    local InputCorner = Instance.new("UICorner")
-    InputCorner.CornerRadius = UDim.new(0, 8)
-    InputCorner.Parent = KeyInputContainer
-    
-    -- Animiere Input Container
-    TweenService:Create(KeyInputContainer, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.5), {
-        BackgroundTransparency = 0.8
-    }):Play()
-    
-    -- Input Box Stroke
-    local InputStroke = Instance.new("UIStroke")
-    InputStroke.Color = Color3.fromRGB(60, 80, 255)
-    InputStroke.Thickness = 1.5
-    InputStroke.Transparency = 1
-    InputStroke.Parent = KeyInputContainer
-    
-    -- Animiere Input Stroke
-    TweenService:Create(InputStroke, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.5), {
-        Transparency = 0.7
-    }):Play()
-    
-    -- Input Icon
-    local InputIcon = Instance.new("ImageLabel")
-    InputIcon.Name = "InputIcon"
-    InputIcon.Size = UDim2.new(0, 20, 0, 20)
-    InputIcon.Position = UDim2.new(0, 12, 0.5, 0)
-    InputIcon.AnchorPoint = Vector2.new(0, 0.5)
-    InputIcon.BackgroundTransparency = 1
-    InputIcon.Image = "rbxassetid://9405924327" -- Key icon
-    InputIcon.ImageTransparency = 1
-    InputIcon.Parent = KeyInputContainer
-    
-    -- Animiere Icon
-    TweenService:Create(InputIcon, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.6), {
-        ImageTransparency = 0.2
-    }):Play()
-    
-    -- Input Box Text
-    local KeyBox = Instance.new("TextBox")
-    KeyBox.Name = "KeyBox"
-    KeyBox.Size = UDim2.new(1, -50, 1, 0)
-    KeyBox.Position = UDim2.new(0, 40, 0, 0)
-    KeyBox.BackgroundTransparency = 1
-    KeyBox.Font = Enum.Font.Gotham
-    KeyBox.Text = savedKey or ""
-    KeyBox.PlaceholderText = "Enter your key here..."
-    KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    KeyBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 130)
-    KeyBox.TextSize = 14
-    KeyBox.TextXAlignment = Enum.TextXAlignment.Left
-    KeyBox.ClearTextOnFocus = false
-    KeyBox.TextTransparency = 1
-    KeyBox.Parent = KeyInputContainer
-    
-    -- Animiere TextBox
-    TweenService:Create(KeyBox, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.6), {
-        TextTransparency = 0
-    }):Play()
-    
-    -- Verify Button
-    local VerifyButton = Instance.new("TextButton")
-    VerifyButton.Name = "VerifyButton"
-    VerifyButton.Size = UDim2.new(0.85, 0, 0, 45)
-    VerifyButton.Position = UDim2.new(0.5, 0, 0, 160)
-    VerifyButton.AnchorPoint = Vector2.new(0.5, 0)
-    VerifyButton.BackgroundColor3 = Color3.fromRGB(40, 70, 255)
-    VerifyButton.BackgroundTransparency = 1
-    VerifyButton.BorderSizePixel = 0
-    VerifyButton.Font = Enum.Font.GothamBold
-    VerifyButton.Text = "VERIFY KEY"
-    VerifyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    VerifyButton.TextSize = 16
-    VerifyButton.TextTransparency = 1
-    VerifyButton.Parent = MainContainer
-    
-    -- Button abgerundete Ecken
-    local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.CornerRadius = UDim.new(0, 8)
-    ButtonCorner.Parent = VerifyButton
-    
-    -- Button Gradient
-    local ButtonGradient = Instance.new("UIGradient")
-    ButtonGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 70, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 120, 255))
+    -- Enhanced 3D shadow for the container
+    local shadow = Instance.new("ImageLabel")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 60, 1, 60)
+    shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://6014261993"
+    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.ImageTransparency = 0.5
+    shadow.Parent = mainContainer
+    shadow.ZIndex = 4
+
+    -- Premium gradient for the container
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 25, 35)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
     })
-    ButtonGradient.Rotation = 45
-    ButtonGradient.Parent = VerifyButton
+    gradient.Rotation = 45
+    gradient.Parent = mainContainer
     
-    -- Animiere Button
-    TweenService:Create(VerifyButton, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.7), {
-        BackgroundTransparency = 0,
-        TextTransparency = 0
-    }):Play()
+    -- Inner glow effect
+    local innerGlow = Instance.new("Frame")
+    innerGlow.Name = "InnerGlow"
+    innerGlow.Size = UDim2.new(1, -4, 1, -4)
+    innerGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    innerGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    innerGlow.BackgroundTransparency = 1
+    innerGlow.BorderSizePixel = 0
+    innerGlow.ZIndex = 6
+    innerGlow.Parent = mainContainer
     
-    -- Status Label
-    local StatusLabel = Instance.new("TextLabel")
-    StatusLabel.Name = "StatusLabel"
-    StatusLabel.Size = UDim2.new(0.85, 0, 0, 20)
-    StatusLabel.Position = UDim2.new(0.5, 0, 0, 215)
-    StatusLabel.AnchorPoint = Vector2.new(0.5, 0)
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Font = Enum.Font.Gotham
-    StatusLabel.Text = "Please enter your key"
-    StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-    StatusLabel.TextSize = 14
-    StatusLabel.TextTransparency = 1
-    StatusLabel.Parent = MainContainer
+    local innerGlowStroke = Instance.new("UIStroke")
+    innerGlowStroke.Color = Color3.fromRGB(100, 100, 240)
+    innerGlowStroke.Thickness = 2
+    innerGlowStroke.Transparency = 0.7
+    innerGlowStroke.Parent = innerGlow
     
-    -- Animiere Status
-    TweenService:Create(StatusLabel, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.8), {
-        TextTransparency = 0
-    }):Play()
+    local innerGlowCorner = Instance.new("UICorner")
+    innerGlowCorner.CornerRadius = UDim.new(0, 18)
+    innerGlowCorner.Parent = innerGlow
     
-    -- Get Key Button
-    local GetKeyButton = Instance.new("TextButton")
-    GetKeyButton.Name = "GetKeyButton"
-    GetKeyButton.Size = UDim2.new(0.3, 0, 0, 20)
-    GetKeyButton.Position = UDim2.new(0.5, 0, 0, 235)
-    GetKeyButton.AnchorPoint = Vector2.new(0.5, 0)
-    GetKeyButton.BackgroundTransparency = 1
-    GetKeyButton.Font = Enum.Font.Gotham
-    GetKeyButton.Text = "GET KEY"
-    GetKeyButton.TextColor3 = Color3.fromRGB(80, 120, 255)
-    GetKeyButton.TextSize = 14
-    GetKeyButton.TextTransparency = 0
-    GetKeyButton.Parent = MainContainer
+    -- Logo container with enhanced 3D effect
+    local logoContainer = Instance.new("Frame")
+    logoContainer.Name = "LogoContainer"
+    logoContainer.Size = UDim2.new(0, 160, 0, 160)
+    logoContainer.Position = UDim2.new(0.5, 0, 0, 60)
+    logoContainer.AnchorPoint = Vector2.new(0.5, 0)
+    logoContainer.BackgroundTransparency = 1
+    logoContainer.Parent = mainContainer
+    logoContainer.ZIndex = 7
     
-    -- Animiere Get Key Button
-    TweenService:Create(GetKeyButton, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out, 0, false, 0.9), {
-        TextTransparency = 0
-    }):Play()
+    -- Logo with enhanced 3D shadow
+    local logo = Instance.new("ImageLabel")
+    logo.Name = "Logo"
+    logo.Size = UDim2.new(1, 0, 1, 0)
+    logo.Position = UDim2.new(0.5, 0, 0.5, 0)
+    logo.AnchorPoint = Vector2.new(0.5, 0.5)
+    logo.BackgroundTransparency = 1
+    logo.Image = logoUrl
+    logo.Parent = logoContainer
+    logo.ZIndex = 8
     
-    -- Animiere Get Key Button Hover-Effekt
-    GetKeyButton.MouseEnter:Connect(function()
-        TweenService:Create(GetKeyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            TextColor3 = Color3.fromRGB(120, 150, 255)
-        }):Play()
-    end)
+    -- Enhanced 3D effect for the logo
+    local logoShadow = Instance.new("ImageLabel")
+    logoShadow.Name = "LogoShadow"
+    logoShadow.Size = UDim2.new(1, 30, 1, 30)
+    logoShadow.Position = UDim2.new(0.5, 0, 0.5, 8)
+    logoShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    logoShadow.BackgroundTransparency = 1
+    logoShadow.Image = logoUrl
+    logoShadow.ImageTransparency = 0.8
+    logoShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    logoShadow.Parent = logoContainer
+    logoShadow.ZIndex = 7
+
+    -- Logo glow effect
+    local logoGlow = Instance.new("ImageLabel")
+    logoGlow.Name = "LogoGlow"
+    logoGlow.Size = UDim2.new(1.2, 0, 1.2, 0)
+    logoGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    logoGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    logoGlow.BackgroundTransparency = 1
+    logoGlow.Image = logoUrl
+    logoGlow.ImageTransparency = 0.9
+    logoGlow.ImageColor3 = Color3.fromRGB(120, 120, 255)
+    logoGlow.Parent = logoContainer
+    logoGlow.ZIndex = 6
     
-    GetKeyButton.MouseLeave:Connect(function()
-        TweenService:Create(GetKeyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            TextColor3 = Color3.fromRGB(80, 120, 255)
-        }):Play()
-    end)
-    
-    -- Animiere Verify Button Hover
-    VerifyButton.MouseEnter:Connect(function()
-        TweenService:Create(VerifyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = Color3.fromRGB(60, 90, 255)
-        }):Play()
-    end)
-    
-    VerifyButton.MouseLeave:Connect(function()
-        TweenService:Create(VerifyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = Color3.fromRGB(40, 70, 255)
-        }):Play()
-    end)
-    
-    -- Animation Input Box wenn Fokus
-    KeyBox.Focused:Connect(function()
-        TweenService:Create(InputStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Transparency = 0,
-            Color = Color3.fromRGB(100, 150, 255)
-        }):Play()
-        
-        TweenService:Create(KeyInputContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundTransparency = 0.7
-        }):Play()
-    end)
-    
-    KeyBox.FocusLost:Connect(function()
-        TweenService:Create(InputStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Transparency = 0.7,
-            Color = Color3.fromRGB(60, 80, 255)
-        }):Play()
-        
-        TweenService:Create(KeyInputContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundTransparency = 0.8
-        }):Play()
-    end)
-    
-    -- Enter-Taste Funktion
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.Return and KeySystemUI.Parent then
-            VerifyButton.MouseButton1Click:Fire()
+    -- Animate logo pulsing
+    spawn(function()
+        while logoGlow.Parent do
+            local growInfo = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+            local shrinkInfo = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+            
+            local growTween = TweenService:Create(logoGlow, growInfo, {
+                Size = UDim2.new(1.4, 0, 1.4, 0),
+                ImageTransparency = 0.7
+            })
+            
+            local shrinkTween = TweenService:Create(logoGlow, shrinkInfo, {
+                Size = UDim2.new(1.2, 0, 1.2, 0),
+                ImageTransparency = 0.9
+            })
+            
+            growTween:Play()
+            wait(2)
+            shrinkTween:Play()
+            wait(2)
         end
     end)
     
-    -- Verify Button Funktionalität
-    VerifyButton.MouseButton1Click:Connect(function()
-        -- Klick-Animation
-        TweenService:Create(VerifyButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0.8, 0, 0, 42)
-        }):Play()
+    -- Create floating effect for logo
+    spawn(function()
+        local floatOffset = 0
+        local floatSpeed = 1
+        local originalY = logo.Position.Y.Scale
         
+        RunService.RenderStepped:Connect(function(dt)
+            if not logo.Parent then return end
+            
+            floatOffset = floatOffset + dt * floatSpeed
+            local newY = originalY + math.sin(floatOffset) * 0.02
+            
+            logo.Position = UDim2.new(0.5, 0, newY, 0)
+            logoShadow.Position = UDim2.new(0.5, 0, newY + 0.02, 8)
+        end)
+    end)
+    
+    -- Title with premium styling
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(0, 300, 0, 50)
+    title.Position = UDim2.new(0.5, 0, 0, 220)
+    title.AnchorPoint = Vector2.new(0.5, 0)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.Text = "MythHub KeySystem"
+    title.TextSize = 28
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Parent = mainContainer
+    title.ZIndex = 9
+    
+    -- Add text stroke for better visibility
+    local titleStroke = Instance.new("UIStroke")
+    titleStroke.Color = Color3.fromRGB(80, 80, 200)
+    titleStroke.Thickness = 1
+    titleStroke.Transparency = 0.7
+    titleStroke.Parent = title
+    
+    -- Text gradient
+    local titleGradient = Instance.new("UIGradient")
+    titleGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 255))
+    })
+    titleGradient.Parent = title
+    
+    -- Animate title gradient
+    spawn(function()
+        local offset = 0
+        while title.Parent do
+            offset = (offset + 0.5) % 1
+            titleGradient.Offset = Vector2.new(offset, 0)
+            wait(0.03)
+        end
+    end)
+    
+    -- Subtitle
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Name = "Subtitle"
+    subtitle.Size = UDim2.new(0, 300, 0, 30)
+    subtitle.Position = UDim2.new(0.5, 0, 0, 265)
+    subtitle.AnchorPoint = Vector2.new(0.5, 0)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.Text = "Please enter your access key"
+    subtitle.TextSize = 16
+    subtitle.TextColor3 = Color3.fromRGB(180, 180, 200)
+    subtitle.Parent = mainContainer
+    subtitle.ZIndex = 9
+    
+    -- Key input field with enhanced 3D styling
+    local keyInputContainer = Instance.new("Frame")
+    keyInputContainer.Name = "KeyInputContainer"
+    keyInputContainer.Size = UDim2.new(0, 340, 0, 50)
+    keyInputContainer.Position = UDim2.new(0.5, 0, 0, 310)
+    keyInputContainer.AnchorPoint = Vector2.new(0.5, 0)
+    keyInputContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    keyInputContainer.BorderSizePixel = 0
+    keyInputContainer.Parent = mainContainer
+    keyInputContainer.ZIndex = 9
+    
+    -- Rounded corners for input container
+    local inputCorner = Instance.new("UICorner")
+    inputCorner.CornerRadius = UDim.new(0, 10)
+    inputCorner.Parent = keyInputContainer
+    
+    -- Input container inner shadow
+    local inputShadow = Instance.new("Frame")
+    inputShadow.Name = "InputShadow"
+    inputShadow.Size = UDim2.new(1, 0, 1, 0)
+    inputShadow.Position = UDim2.new(0, 0, 0, 0)
+    inputShadow.BackgroundTransparency = 1
+    inputShadow.BorderSizePixel = 0
+    inputShadow.Parent = keyInputContainer
+    inputShadow.ZIndex = 9
+    
+    local inputStroke = Instance.new("UIStroke")
+    inputStroke.Color = Color3.fromRGB(100, 100, 240)
+    inputStroke.Thickness = 2
+    inputStroke.Transparency = 0.8
+    inputStroke.Parent = inputShadow
+    
+    local inputCornerShadow = Instance.new("UICorner")
+    inputCornerShadow.CornerRadius = UDim.new(0, 10)
+    inputCornerShadow.Parent = inputShadow
+    
+    -- Input field for key
+    local keyInput = Instance.new("TextBox")
+    keyInput.Name = "KeyInput"
+    keyInput.Size = UDim2.new(1, -20, 1, 0)
+    keyInput.Position = UDim2.new(0.5, 0, 0.5, 0)
+    keyInput.AnchorPoint = Vector2.new(0.5, 0.5)
+    keyInput.BackgroundTransparency = 1
+    keyInput.Font = Enum.Font.Gotham
+    keyInput.Text = ""
+    keyInput.PlaceholderText = "Enter your key here..."
+    keyInput.TextSize = 16
+    keyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyInput.PlaceholderColor3 = Color3.fromRGB(120, 120, 140)
+    keyInput.TextXAlignment = Enum.TextXAlignment.Left
+    keyInput.Parent = keyInputContainer
+    keyInput.ZIndex = 10
+    keyInput.ClearTextOnFocus = false
+    
+    -- Key icon
+    local keyIcon = Instance.new("ImageLabel")
+    keyIcon.Name = "KeyIcon"
+    keyIcon.Size = UDim2.new(0, 20, 0, 20)
+    keyIcon.Position = UDim2.new(0, 15, 0.5, 0)
+    keyIcon.AnchorPoint = Vector2.new(0, 0.5)
+    keyIcon.BackgroundTransparency = 1
+    keyIcon.Image = "rbxassetid://3926307971"
+    keyIcon.ImageRectOffset = Vector2.new(164, 404)
+    keyIcon.ImageRectSize = Vector2.new(36, 36)
+    keyIcon.ImageColor3 = Color3.fromRGB(150, 150, 240)
+    keyIcon.Parent = keyInputContainer
+    keyIcon.ZIndex = 10
+    
+    keyInput.Position = UDim2.new(0.5, 10, 0.5, 0)
+    
+    -- Submit button with enhanced 3D styling
+    local submitButton = Instance.new("TextButton")
+    submitButton.Name = "SubmitButton"
+    submitButton.Size = UDim2.new(0, 160, 0, 50)
+    submitButton.Position = UDim2.new(0.5, -85, 0, 380)
+    submitButton.AnchorPoint = Vector2.new(0.5, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(60, 60, 180)
+    submitButton.BorderSizePixel = 0
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.Text = "SUBMIT"
+    submitButton.TextSize = 18
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Parent = mainContainer
+    submitButton.ZIndex = 10
+    
+    -- Rounded corners for submit button
+    local submitCorner = Instance.new("UICorner")
+    submitCorner.CornerRadius = UDim.new(0, 10)
+    submitCorner.Parent = submitButton
+    
+    -- Button gradient
+    local submitGradient = Instance.new("UIGradient")
+    submitGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 180)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 90, 220))
+    })
+    submitGradient.Rotation = 45
+    submitGradient.Parent = submitButton
+    
+    -- Button shadow
+    local submitShadow = Instance.new("Frame")
+    submitShadow.Name = "SubmitShadow"
+    submitShadow.Size = UDim2.new(1, 0, 1, 0)
+    submitShadow.Position = UDim2.new(0, 0, 0, 4)
+    submitShadow.BackgroundColor3 = Color3.fromRGB(40, 40, 120)
+    submitShadow.BorderSizePixel = 0
+    submitShadow.ZIndex = 9
+    submitShadow.Parent = submitButton
+    
+    local submitShadowCorner = Instance.new("UICorner")
+    submitShadowCorner.CornerRadius = UDim.new(0, 10)
+    submitShadowCorner.Parent = submitShadow
+    
+    -- Get Key button
+    local getKeyButton = Instance.new("TextButton")
+    getKeyButton.Name = "GetKeyButton"
+    getKeyButton.Size = UDim2.new(0, 160, 0, 50)
+    getKeyButton.Position = UDim2.new(0.5, 85, 0, 380)
+    getKeyButton.AnchorPoint = Vector2.new(0.5, 0)
+    getKeyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+    getKeyButton.BorderSizePixel = 0
+    getKeyButton.Font = Enum.Font.GothamBold
+    getKeyButton.Text = "GET KEY"
+    getKeyButton.TextSize = 18
+    getKeyButton.TextColor3 = Color3.fromRGB(220, 220, 240)
+    getKeyButton.Parent = mainContainer
+    getKeyButton.ZIndex = 10
+    
+    -- Rounded corners for get key button
+    local getKeyCorner = Instance.new("UICorner")
+    getKeyCorner.CornerRadius = UDim.new(0, 10)
+    getKeyCorner.Parent = getKeyButton
+    
+    -- Button gradient
+    local getKeyGradient = Instance.new("UIGradient")
+    getKeyGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 65)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 70, 90))
+    })
+    getKeyGradient.Rotation = 45
+    getKeyGradient.Parent = getKeyButton
+    
+    -- Button shadow
+    local getKeyShadow = Instance.new("Frame")
+    getKeyShadow.Name = "GetKeyShadow"
+    getKeyShadow.Size = UDim2.new(1, 0, 1, 0)
+    getKeyShadow.Position = UDim2.new(0, 0, 0, 4)
+    getKeyShadow.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    getKeyShadow.BorderSizePixel = 0
+    getKeyShadow.ZIndex = 9
+    getKeyShadow.Parent = getKeyButton
+    
+    local getKeyShadowCorner = Instance.new("UICorner")
+    getKeyShadowCorner.CornerRadius = UDim.new(0, 10)
+    getKeyShadowCorner.Parent = getKeyShadow
+    
+    -- Status message
+    local statusMessage = Instance.new("TextLabel")
+    statusMessage.Name = "StatusMessage"
+    statusMessage.Size = UDim2.new(0, 340, 0, 30)
+    statusMessage.Position = UDim2.new(0.5, 0, 0, 450)
+    statusMessage.AnchorPoint = Vector2.new(0.5, 0)
+    statusMessage.BackgroundTransparency = 1
+    statusMessage.Font = Enum.Font.Gotham
+    statusMessage.Text = ""
+    statusMessage.TextSize = 16
+    statusMessage.TextColor3 = Color3.fromRGB(180, 180, 200)
+    statusMessage.Parent = mainContainer
+    statusMessage.ZIndex = 10
+    
+    -- Animation functions
+    local function fadeIn(obj, endTrans, duration)
+        local startTrans = obj.BackgroundTransparency
+        local fadeStep = (startTrans - endTrans) / 10
+        for i = 1, 10 do
+            obj.BackgroundTransparency = startTrans - (fadeStep * i)
+            wait(duration / 10)
+        end
+        obj.BackgroundTransparency = endTrans
+    end
+    
+    local function buttonHoverEffect(button, shadowObj, originalPos, hoverPos)
+        local isHovering = false
+        
+        button.MouseEnter:Connect(function()
+            isHovering = true
+            game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {Position = hoverPos}):Play()
+            game:GetService("TweenService"):Create(shadowObj, TweenInfo.new(0.2), {Position = UDim2.new(0.5, 0, 0.5, 2)}):Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            isHovering = false
+            game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {Position = originalPos}):Play()
+            game:GetService("TweenService"):Create(shadowObj, TweenInfo.new(0.2), {Position = UDim2.new(0.5, 0, 0.5, 4)}):Play()
+        end)
+        
+        return {
+            PressEffect = function()
+                if isHovering then
+                    game:GetService("TweenService"):Create(button, TweenInfo.new(0.1), {Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, originalPos.Y.Scale, originalPos.Y.Offset + 2)}):Play()
+                    game:GetService("TweenService"):Create(shadowObj, TweenInfo.new(0.1), {Position = UDim2.new(0.5, 0, 0.5, 2)}):Play()
+                    wait(0.1)
+                    game:GetService("TweenService"):Create(button, TweenInfo.new(0.1), {Position = hoverPos}):Play()
+                    game:GetService("TweenService"):Create(shadowObj, TweenInfo.new(0.1), {Position = UDim2.new(0.5, 0, 0.5, 2)}):Play()
+                end
+            end
+        }
+    end
+    
+    local function pulseEffect(obj, duration, scale)
+        local originalSize = obj.Size
+        local targetSize = UDim2.new(originalSize.X.Scale * scale, originalSize.X.Offset * scale, originalSize.Y.Scale * scale, originalSize.Y.Offset * scale)
+        
+        game:GetService("TweenService"):Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = targetSize}):Play()
+        wait(duration)
+        game:GetService("TweenService"):Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = originalSize}):Play()
+    end
+    
+    local function showSuccessAnimation()
+        -- Create a success circle
+        local successCircle = Instance.new("Frame")
+        successCircle.Name = "SuccessCircle"
+        successCircle.Size = UDim2.new(0, 0, 0, 0)
+        successCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+        successCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+        successCircle.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+        successCircle.BackgroundTransparency = 0.2
+        successCircle.BorderSizePixel = 0
+        successCircle.Parent = mainContainer
+        
+        -- Rounded corners for the circle
+        local circleCorner = Instance.new("UICorner")
+        circleCorner.CornerRadius = UDim.new(1, 0)
+        circleCorner.Parent = successCircle
+        
+        -- Animate the circle
+        game:GetService("TweenService"):Create(successCircle, TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Size = UDim2.new(0, 300, 0, 300)}):Play()
+        wait(0.5)
+        game:GetService("TweenService"):Create(successCircle, TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+        wait(0.5)
+        
+        successCircle:Destroy()
+    end
+    
+    local function showErrorAnimation()
+        -- Shake the container
+        local originalPos = mainContainer.Position
+        for i = 1, 6 do
+            local xOffset = (i % 2 == 0) and 10 or -10
+            game:GetService("TweenService"):Create(mainContainer, TweenInfo.new(0.05), {Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset + xOffset, originalPos.Y.Scale, originalPos.Y.Offset)}):Play()
+            wait(0.05)
+        end
+        game:GetService("TweenService"):Create(mainContainer, TweenInfo.new(0.05), {Position = originalPos}):Play()
+        
+        -- Red outline for the input field
+        local originalColor = inputStroke.Color
+        inputStroke.Color = Color3.fromRGB(255, 80, 80)
+        wait(0.5)
+        game:GetService("TweenService"):Create(inputStroke, TweenInfo.new(0.3), {Color = originalColor}):Play()
+    end
+    
+    -- Add animations for introduction
+    background.BackgroundTransparency = 1
+    mainContainer.Position = UDim2.new(0.5, 0, 1.5, 0)
+    
+    -- Animate appearance
+    game:GetService("TweenService"):Create(background, TweenInfo.new(fadeInSpeed), {BackgroundTransparency = 0.3}):Play()
+    wait(fadeInSpeed * 0.5)
+    game:GetService("TweenService"):Create(mainContainer, TweenInfo.new(fadeInSpeed, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
+    
+    -- Logo animation
+    logo.ImageTransparency = 1
+    logoShadow.ImageTransparency = 1
+    game:GetService("TweenService"):Create(logo, TweenInfo.new(fadeInSpeed), {ImageTransparency = 0}):Play()
+    game:GetService("TweenService"):Create(logoShadow, TweenInfo.new(fadeInSpeed), {ImageTransparency = 0.8}):Play()
+    
+    -- Interactive animations for buttons
+    local checkButtonEffects = buttonHoverEffect(submitButton, submitShadow, submitButton.Position, UDim2.new(0.5, 0, 0, 378))
+    local getKeyButtonEffects = buttonHoverEffect(getKeyButton, getKeyShadow, getKeyButton.Position, UDim2.new(0.5, 0, 0, 378))
+    
+    -- 3D rotation for the logo
+    spawn(function()
+        while true do
+            for i = 0, 360, 1 do
+                if not logoContainer or not logoContainer.Parent then
+                    return
+                end
+                
+                local rad = math.rad(i)
+                local xOffset = math.sin(rad) * 5
+                local yOffset = math.cos(rad) * 3
+                
+                logoContainer.Position = UDim2.new(0.5, xOffset, 0, 50 + yOffset)
+                
+                wait(0.03)
+            end
+        end
+    end)
+    
+    -- Button press animations
+    local function animateButtonPress(button, shadowFrame)
+        local originalPosition = button.Position
+        local pressedPosition = UDim2.new(
+            originalPosition.X.Scale, 
+            originalPosition.X.Offset, 
+            originalPosition.Y.Scale, 
+            originalPosition.Y.Offset + 4
+        )
+        
+        -- Hide shadow
+        shadowFrame.Visible = false
+        
+        -- Move button down
+        button.Position = pressedPosition
+        
+        -- Short wait
         wait(0.1)
         
-        TweenService:Create(VerifyButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0.85, 0, 0, 45)
-        }):Play()
+        -- Restore position and shadow
+        button.Position = originalPosition
+        shadowFrame.Visible = true
+    end
+    
+    -- Add click animations to buttons
+    submitButton.MouseButton1Click:Connect(function()
+        animateButtonPress(submitButton, submitShadow)
         
-        -- Validierung
-        local keyInput = KeyBox.Text
+        -- Validation
+        local key = keyInput.Text
         
-        if keyInput == "" then
-            -- Fehler-Animation
-            StatusLabel.Text = "Please enter a key!"
-            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-            
-            -- Schüttel-Animation für die TextBox
-            local originalPosition = KeyInputContainer.Position
-            for i = 1, 5 do
-                TweenService:Create(KeyInputContainer, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Position = originalPosition + UDim2.new(0, 5, 0, 0)
-                }):Play()
-                wait(0.05)
-                TweenService:Create(KeyInputContainer, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Position = originalPosition - UDim2.new(0, 5, 0, 0)
-                }):Play()
-                wait(0.05)
-            end
-            TweenService:Create(KeyInputContainer, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = originalPosition
-            }):Play()
-            
+        if key == "" then
+            statusMessage.Text = "Please enter your key"
+            statusMessage.TextColor3 = Color3.fromRGB(255, 100, 100)
             return
         end
         
-        -- Lade-Animation
-        StatusLabel.Text = "Verifying..."
-        StatusLabel.TextColor3 = Color3.fromRGB(80, 170, 255)
+        -- Show checking animation
+        statusMessage.Text = "Checking key..."
+        statusMessage.TextColor3 = Color3.fromRGB(180, 180, 200)
         
-        -- Key validieren
-        local isValid = MythKeySystem.validateKey(keyInput)
+        -- Verify key
+        local isKeyValid = KeyIsValid(key)
         
-        if isValid then
-            -- Erfolg-Animation
-            StatusLabel.Text = "Success! Welcome to MYTHHUB PREMIUM"
-            StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        if isKeyValid then
+            -- Success animation
+            statusMessage.Text = "Key verified successfully!"
+            statusMessage.TextColor3 = Color3.fromRGB(100, 255, 100)
             
-            -- Speichere den key
-            local WindowUtil = game:GetService("ReplicatedStorage"):FindFirstChild("SharedModules") and 
-                               require(game:GetService("ReplicatedStorage").SharedModules:FindFirstChild("WindowUtil"))
-                               
-            if WindowUtil then
-                WindowUtil:SetSetting("MythHubKey", keyInput)
+            -- Add success particles
+            for i = 1, 30 do
+                local particle = Instance.new("Frame")
+                particle.Name = "SuccessParticle"
+                particle.Size = UDim2.new(0, math.random(3, 6), 0, math.random(3, 6))
+                particle.Position = UDim2.new(math.random(1, 10)/10, 0, math.random(1, 10)/10, 0)
+                particle.BackgroundColor3 = Color3.fromRGB(
+                    math.random(50, 150), 
+                    math.random(200, 255), 
+                    math.random(50, 150)
+                )
+                particle.BorderSizePixel = 0
+                particle.ZIndex = 8
+                particle.Parent = mainContainer
+                
+                local particleCorner = Instance.new("UICorner")
+                particleCorner.CornerRadius = UDim.new(1, 0)
+                particleCorner.Parent = particle
+                
+                -- Animate particle
+                spawn(function()
+                    local randX = math.random(-100, 100) / 100
+                    local randY = math.random(-100, 0) / 100
+                    
+                    for t = 0, 1, 0.05 do
+                        if not particle.Parent then break end
+                        
+                        particle.Position = UDim2.new(
+                            particle.Position.X.Scale + randX * 0.03,
+                            particle.Position.X.Offset,
+                            particle.Position.Y.Scale + randY * 0.03 - 0.02, 
+                            particle.Position.Y.Offset
+                        )
+                        
+                        particle.BackgroundTransparency = t
+                        wait(0.03)
+                    end
+                    
+                    if particle.Parent then
+                        particle:Destroy()
+                    end
+                end)
             end
             
-            -- Erfolgsanimation für den Button
-            TweenService:Create(VerifyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundColor3 = Color3.fromRGB(100, 255, 100)
-            }):Play()
+            -- Save valid key
+            KeySystem.SavedKey = key
             
-            -- Pulsierender Effekt für den Button
-            for i = 1, 3 do
-                TweenService:Create(VerifyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Size = UDim2.new(0.9, 0, 0, 50)
-                }):Play()
-                wait(0.3)
-                TweenService:Create(VerifyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                    Size = UDim2.new(0.85, 0, 0, 45)
-                }):Play()
-                wait(0.3)
-            end
+            -- Wait a moment before closing
+            wait(1)
             
-            -- Animiere das Ausblenden des UI
-            TweenService:Create(MainContainer, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-                Size = UDim2.new(0, 0, 0, 0),
+            -- Close animation - fade out
+            local closeTween = TweenService:Create(mainContainer, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0.5, 0, 1.5, 0)
+            })
+            
+            local fadeOutTween = TweenService:Create(background, TweenInfo.new(0.8, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                 BackgroundTransparency = 1
-            }):Play()
+            })
             
-            TweenService:Create(BlurOverlay, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-                BackgroundTransparency = 1
-            }):Play()
+            closeTween:Play()
+            fadeOutTween:Play()
             
-            TweenService:Create(BackgroundImage, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-                ImageTransparency = 1
-            }):Play()
+            -- Wait for animation to finish
+            wait(0.8)
             
-            -- Blur ausblenden
-            TweenService:Create(BlurEffect, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-                Size = 0
-            }):Play()
+            -- Cleanup
+            keySystemGui:Destroy()
             
-            wait(0.9)
-            
-            -- UI entfernen
-            KeySystemUI:Destroy()
-            BlurEffect:Destroy()
-            
-            -- Key ist valid
-            MythKeySystem.isKeyValid = true
+            -- Return true to the caller
             return true
         else
-            -- Fehler-Animation
-            StatusLabel.Text = "Invalid key!"
-            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            -- Failure animation
+            statusMessage.Text = "Invalid key. Please try again."
+            statusMessage.TextColor3 = Color3.fromRGB(255, 100, 100)
             
-            -- Schüttel-Animation für die TextBox
-            local originalPosition = KeyInputContainer.Position
-            for i = 1, 5 do
-                TweenService:Create(KeyInputContainer, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Position = originalPosition + UDim2.new(0, 5, 0, 0)
-                }):Play()
-                wait(0.05)
-                TweenService:Create(KeyInputContainer, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Position = originalPosition - UDim2.new(0, 5, 0, 0)
-                }):Play()
-                wait(0.05)
+            -- Shake animation
+            for i = 1, 6 do
+                mainContainer.Position = UDim2.new(0.5, math.random(-10, 10), 0.5, math.random(-5, 5))
+                wait(0.04)
             end
-            TweenService:Create(KeyInputContainer, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = originalPosition
-            }):Play()
             
-            -- Key ist invalid
-            MythKeySystem.isKeyValid = false
+            -- Reset position
+            mainContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+            
             return false
         end
     end)
     
-    -- Get Key Button Funktionalität
-    GetKeyButton.MouseButton1Click:Connect(function()
-        -- Klick-Animation
-        TweenService:Create(GetKeyButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            TextSize = 16
-        }):Play()
+    -- Get key button animation and function
+    getKeyButton.MouseButton1Click:Connect(function()
+        animateButtonPress(getKeyButton, getKeyShadow)
         
-        wait(0.1)
+        -- Show checking animation
+        statusMessage.Text = "Getting key link..."
+        statusMessage.TextColor3 = Color3.fromRGB(180, 180, 200)
         
-        TweenService:Create(GetKeyButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            TextSize = 14
-        }):Play()
+        -- Get key link
+        local keyLink = GetKeyLink()
         
-        -- KeyGuardian Link kopieren
-        local keyLink = MythKeySystem.getKeyLink()
-        setclipboard(keyLink)
-        
-        -- Bestätigungs-Animation
-        local originalText = GetKeyButton.Text
-        GetKeyButton.Text = "COPIED!"
-        StatusLabel.Text = "Key link copied to clipboard!"
-        StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-        
-        -- Bestätigungs-Animation für Button
-        TweenService:Create(GetKeyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            TextColor3 = Color3.fromRGB(100, 255, 100)
-        }):Play()
-        
-        wait(2)
-        
-        -- Reset Button
-        GetKeyButton.Text = originalText
-        TweenService:Create(GetKeyButton, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            TextColor3 = Color3.fromRGB(80, 120, 255)
-        }):Play()
-        
-        StatusLabel.Text = "Please enter your key"
-        StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-    end)
-    
-    -- Drag-Funktion für das UI
-    local isDragging = false
-    local dragStart = nil
-    local startPos = nil
-    
-    MainContainer.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isDragging = true
-            dragStart = input.Position
-            startPos = MainContainer.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    isDragging = false
-                end
+        if keyLink and keyLink ~= "" then
+            -- Copy to clipboard
+            local success = pcall(function()
+                setclipboard(keyLink)
             end)
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            if isDragging then
-                local delta = input.Position - dragStart
-                TweenService:Create(MainContainer, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                    Position = UDim2.new(
-                        startPos.X.Scale,
-                        startPos.X.Offset + delta.X,
-                        startPos.Y.Scale,
-                        startPos.Y.Offset + delta.Y
-                    )
-                }):Play()
+            
+            if success then
+                statusMessage.Text = "Link copied to clipboard!"
+                statusMessage.TextColor3 = Color3.fromRGB(100, 200, 255)
+            else
+                statusMessage.Text = keyLink
+                statusMessage.TextColor3 = Color3.fromRGB(100, 200, 255)
             end
+            
+            -- Attempt to open in browser
+            pcall(function()
+                game:GetService("GuiService"):OpenBrowserWindow(keyLink)
+            end)
+        else
+            statusMessage.Text = "Error getting key link"
+            statusMessage.TextColor3 = Color3.fromRGB(255, 100, 100)
         end
     end)
     
-    -- Prüfe den anfangs übergebenen Key
-    if savedKey and savedKey ~= "" then
-        local isValid = MythKeySystem.validateKey(savedKey)
-        MythKeySystem.isKeyValid = isValid
+    -- Interactive hover effects for buttons
+    local function setupButtonHover(button, gradient, originalTopColor, hoverTopColor)
+        -- Original colors
+        local originalColorSequence = gradient.Color
         
-        if isValid then
-            -- Wenn key gültig ist, UI ausblenden
-            TweenService:Create(MainContainer, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-                Size = UDim2.new(0, 0, 0, 0),
-                BackgroundTransparency = 1
-            }):Play()
+        -- Hover color sequence - brighten the top color
+        local hoverColorSequence = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, hoverTopColor),
+            ColorSequenceKeypoint.new(1, originalColorSequence.Keypoints[1].Value)
+        })
+        
+        button.MouseEnter:Connect(function()
+            -- Scale up slightly
+            local growTween = TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.new(button.Size.X.Scale, button.Size.X.Offset + 5, button.Size.Y.Scale, button.Size.Y.Offset + 2)
+            })
+            growTween:Play()
             
-            TweenService:Create(BlurOverlay, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-                BackgroundTransparency = 1
-            }):Play()
+            -- Change gradient
+            gradient.Color = hoverColorSequence
+        end)
+        
+        button.MouseLeave:Connect(function()
+            -- Scale back to original
+            local shrinkTween = TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.new(button.Size.X.Scale, button.Size.X.Offset - 5, button.Size.Y.Scale, button.Size.Y.Offset - 2)
+            })
+            shrinkTween:Play()
             
-            TweenService:Create(BackgroundImage, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-                ImageTransparency = 1
-            }):Play()
-            
-            -- Blur ausblenden
-            TweenService:Create(BlurEffect, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
-                Size = 0
-            }):Play()
-            
-            wait(0.9)
-            
-            -- UI entfernen
-            KeySystemUI:Destroy()
-            BlurEffect:Destroy()
-            
+            -- Restore original gradient
+            gradient.Color = originalColorSequence
+        end)
+    end
+    
+    -- Setup hover effects
+    setupButtonHover(
+        submitButton, 
+        submitGradient, 
+        Color3.fromRGB(60, 60, 180), 
+        Color3.fromRGB(90, 90, 255)
+    )
+    
+    setupButtonHover(
+        getKeyButton, 
+        getKeyGradient, 
+        Color3.fromRGB(50, 50, 65), 
+        Color3.fromRGB(80, 80, 110)
+    )
+    
+    -- Focus effect for input field
+    keyInput.Focused:Connect(function()
+        -- Grow the stroke
+        local growStroke = TweenService:Create(inputStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Thickness = 3,
+            Transparency = 0.5
+        })
+        growStroke:Play()
+    end)
+    
+    keyInput.FocusLost:Connect(function()
+        -- Shrink the stroke back
+        local shrinkStroke = TweenService:Create(inputStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Thickness = 2,
+            Transparency = 0.8
+        })
+        shrinkStroke:Play()
+    end)
+    
+    -- Return KeySystem object
+    return KeySystem
+end
+
+function MythKeySystem.ValidateKey()
+    -- Try to read the saved key
+    local key = ""
+    local success, result = pcall(function()
+        return readfile("MythHubKey.txt")
+    end)
+    
+    if success then
+        key = result
+        -- Check the saved key
+        if KeyIsValid(key) then
             return true
         end
     end
     
-    -- Falls wir hier ankommen, bleib bei der UI und gib false zurück
-    return false
+    -- Show the UI if no valid key is found
+    return MythKeySystem.CreateKeyUI()
 end
 
--- Rückgabe des KeySystems
 return MythKeySystem
