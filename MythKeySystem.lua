@@ -1,4 +1,4 @@
-local KeyGuardLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/MaGiXxScripter0/keysystem/master/KeyGuard.lua"))()
+local KeyGuardLibrary = loadstring(game:HttpGet("https://cdn.keyguardian.org/library/v1.0.0.lua"))()
 
 -- Key System Configurations
 local publicToken = "m4gixscrpter"
