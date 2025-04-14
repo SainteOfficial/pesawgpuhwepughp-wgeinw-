@@ -62,46 +62,95 @@ MythKeySystem.initialize = function(savedKey)
     -- Animiere Blur
     TweenService:Create(BlurEffect, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = 20}):Play()
     
-    -- Background Image
+    -- Background Image mit Parallax-Effekt
     local BackgroundImage = Instance.new("ImageLabel")
     BackgroundImage.Name = "BackgroundImage"
-    BackgroundImage.Size = UDim2.new(1, 0, 1, 0)
+    BackgroundImage.Size = UDim2.new(1.2, 0, 1.2, 0) -- Größer für Parallax-Effekt
     BackgroundImage.Position = UDim2.new(0.5, 0, 0.5, 0)
     BackgroundImage.AnchorPoint = Vector2.new(0.5, 0.5)
     BackgroundImage.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    BackgroundImage.BackgroundTransparency = 0
-    BackgroundImage.Image = "rbxassetid://13928991786" -- Anime city (replace with your own if needed)
+    BackgroundImage.Image = "rbxassetid://13928991786" -- Anime city
     BackgroundImage.ImageTransparency = 0
     BackgroundImage.ScaleType = Enum.ScaleType.Crop
     BackgroundImage.Parent = KeySystemUI
     
     -- Animiere Hintergrundbild
-    TweenService:Create(BackgroundImage, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {ImageTransparency = 0.3}):Play()
+    TweenService:Create(BackgroundImage, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {ImageTransparency = 0.2}):Play()
     
-    -- Animation für sanftes Zoomen des Hintergrunds
-    spawn(function()
-        local originalSize = UDim2.new(1, 0, 1, 0)
-        local zoomedSize = UDim2.new(1.1, 0, 1.1, 0)
-        
-        while KeySystemUI.Parent do
-            TweenService:Create(BackgroundImage, TweenInfo.new(10, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = zoomedSize}):Play()
-            wait(10)
-            TweenService:Create(BackgroundImage, TweenInfo.new(10, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = originalSize}):Play()
-            wait(10)
+    -- Parallax-Effekt für den Hintergrund
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mousePos = UserInputService:GetMouseLocation()
+            local viewportSize = workspace.CurrentCamera.ViewportSize
+            
+            local xOffset = (mousePos.X / viewportSize.X) - 0.5
+            local yOffset = (mousePos.Y / viewportSize.Y) - 0.5
+            
+            TweenService:Create(BackgroundImage, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0.5 - (xOffset * 0.05), 0, 0.5 - (yOffset * 0.05), 0)
+            }):Play()
         end
     end)
     
-    -- Overlay zum Abdunkeln
-    local DarkOverlay = Instance.new("Frame")
-    DarkOverlay.Name = "DarkOverlay"
-    DarkOverlay.Size = UDim2.new(1, 0, 1, 0)
-    DarkOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    DarkOverlay.BackgroundTransparency = 1
-    DarkOverlay.BorderSizePixel = 0
-    DarkOverlay.Parent = KeySystemUI
+    -- Animation für sanftes Zoomen des Hintergrunds
+    spawn(function()
+        local originalSize = UDim2.new(1.2, 0, 1.2, 0)
+        local zoomedSize = UDim2.new(1.25, 0, 1.25, 0)
+        
+        while KeySystemUI.Parent do
+            TweenService:Create(BackgroundImage, TweenInfo.new(15, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = zoomedSize}):Play()
+            wait(15)
+            TweenService:Create(BackgroundImage, TweenInfo.new(15, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = originalSize}):Play()
+            wait(15)
+        end
+    end)
     
-    -- Animiere Overlay
-    TweenService:Create(DarkOverlay, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {BackgroundTransparency = 0.4}):Play()
+    -- Blur-Overlay anstatt Dark-Overlay für Glasmorphism-Effekt
+    local BlurOverlay = Instance.new("Frame")
+    BlurOverlay.Name = "BlurOverlay"
+    BlurOverlay.Size = UDim2.new(1, 0, 1, 0)
+    BlurOverlay.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+    BlurOverlay.BackgroundTransparency = 1
+    BlurOverlay.BorderSizePixel = 0
+    BlurOverlay.Parent = KeySystemUI
+    
+    -- Animiere Blur-Overlay
+    TweenService:Create(BlurOverlay, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {BackgroundTransparency = 0.65}):Play()
+    
+    -- Füge Partikel für Dynamik hinzu
+    spawn(function()
+        for i = 1, 30 do
+            local particle = Instance.new("Frame")
+            particle.Name = "Particle" .. i
+            particle.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
+            particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+            particle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            particle.BackgroundTransparency = math.random(7, 9) / 10
+            particle.BorderSizePixel = 0
+            particle.ZIndex = 2
+            particle.Parent = BlurOverlay
+            
+            local cornerRadius = Instance.new("UICorner")
+            cornerRadius.CornerRadius = UDim.new(1, 0)
+            cornerRadius.Parent = particle
+            
+            spawn(function()
+                local speed = math.random(10, 40) / 1000
+                local direction = math.random() > 0.5 and 1 or -1
+                
+                while KeySystemUI.Parent do
+                    particle.Position = UDim2.new(
+                        particle.Position.X.Scale,
+                        0,
+                        (particle.Position.Y.Scale + (speed * direction)) % 1,
+                        0
+                    )
+                    particle.Rotation = particle.Rotation + (speed * 50)
+                    wait()
+                end
+            end)
+        end
+    end)
     
     -- Main Container
     local MainContainer = Instance.new("Frame")
@@ -515,7 +564,7 @@ MythKeySystem.initialize = function(savedKey)
                 BackgroundTransparency = 1
             }):Play()
             
-            TweenService:Create(DarkOverlay, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
+            TweenService:Create(BlurOverlay, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
                 BackgroundTransparency = 1
             }):Play()
             
@@ -651,7 +700,7 @@ MythKeySystem.initialize = function(savedKey)
                 BackgroundTransparency = 1
             }):Play()
             
-            TweenService:Create(DarkOverlay, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
+            TweenService:Create(BlurOverlay, TweenInfo.new(0.8, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
                 BackgroundTransparency = 1
             }):Play()
             
