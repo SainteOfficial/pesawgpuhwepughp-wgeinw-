@@ -367,7 +367,7 @@ MythKeySystem.initialize = function(savedKey)
     GetKeyButton.Text = "GET KEY"
     GetKeyButton.TextColor3 = Color3.fromRGB(80, 120, 255)
     GetKeyButton.TextSize = 14
-    GetKeyButton.TextTransparency = a
+    GetKeyButton.TextTransparency = 0
     GetKeyButton.Parent = MainContainer
     
     -- Animiere Get Key Button
